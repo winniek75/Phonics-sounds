@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Phonics Game!</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFF176;
+    --bg2: #FFE0B2;
+    --primary: #FF6F00;
+    --primary-dark: #E65100;
+    --yes: #00C853;
+    --yes-dark: #007B33;
+    --no: #FF1744;
+    --no-dark: #C40039;
+    --card: #FFFFFF;
+    --text: #212121;
+    --outline: #212121;
+    --shadow: 5px 5px 0px #212121;
+    --radius: 24px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Fredoka One', cursive;
+    background: linear-gradient(160deg, #FFE57F 0%, #FFAB40 50%, #FF7043 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* ========== SCREENS ========== */
+  .screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 480px;
+    min-height: 100vh;
+    padding: 24px;
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+  }
+  .screen.active { display: flex; }
+
+  /* ========== START SCREEN ========== */
+  #start-screen {
+    gap: 28px;
+    text-align: center;
+  }
+
+  .game-title {
+    font-size: 64px;
+    color: var(--card);
+    text-shadow: 4px 4px 0 var(--outline);
+    animation: bounce 1.2s ease-in-out infinite;
+    line-height: 1;
+  }
+
+  .game-subtitle {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 18px;
+    color: var(--text);
+    background: var(--card);
+    border: 3px solid var(--outline);
+    border-radius: 16px;
+    padding: 10px 24px;
+    box-shadow: var(--shadow);
+  }
+
+  .letter-selector-label {
+    font-size: 20px;
+    color: var(--card);
+    text-shadow: 2px 2px 0 var(--outline);
+  }
+
+  .letter-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    max-width: 360px;
+  }
+
+  .letter-btn {
+    width: 72px;
+    height: 72px;
+    border-radius: 16px;
+    border: 4px solid var(--outline);
+    background: var(--card);
+    font-family: 'Fredoka One', cursive;
+    font-size: 36px;
+    color: var(--text);
+    cursor: pointer;
+    box-shadow: 5px 5px 0 var(--outline);
+    transition: transform 0.1s, box-shadow 0.1s;
+    position: relative;
+  }
+  .letter-btn:active, .letter-btn.selected {
+    transform: translate(3px, 3px);
+    box-shadow: 2px 2px 0 var(--outline);
+    background: #FFE57F;
+  }
+  .letter-btn.selected {
+    background: #FFCA28;
+    border-color: var(--primary);
+  }
+
+  .start-btn {
+    padding: 20px 56px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 36px;
+    color: var(--card);
+    background: var(--primary);
+    border: 4px solid var(--outline);
+    border-radius: var(--radius);
+    cursor: pointer;
+    box-shadow: 6px 6px 0 var(--outline);
+    transition: transform 0.1s, box-shadow 0.1s;
+    animation: pulse-btn 2s ease-in-out infinite;
+  }
+  .start-btn:active {
+    transform: translate(4px, 4px);
+    box-shadow: 2px 2px 0 var(--outline);
+    animation: none;
+  }
+  .start-btn:disabled {
+    opacity: 0.4;
+    animation: none;
+    cursor: not-allowed;
+  }
+
+  /* ========== GAME SCREEN ========== */
+  #game-screen {
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .hud {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .score-box {
+    background: var(--card);
+    border: 3px solid var(--outline);
+    border-radius: 14px;
+    padding: 8px 20px;
+    font-size: 24px;
+    color: var(--text);
+    box-shadow: 3px 3px 0 var(--outline);
+    min-width: 80px;
+    text-align: center;
+  }
+  .score-box span {
+    font-size: 14px;
+    display: block;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    color: #888;
+  }
+
+  /* Timer */
+  .timer-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .timer-num {
+    font-size: 40px;
+    color: var(--card);
+    text-shadow: 3px 3px 0 var(--outline);
+    line-height: 1;
+    transition: color 0.3s;
+  }
+  .timer-num.warning { color: #FF1744; animation: shake 0.3s ease infinite; }
+  .timer-bar-bg {
+    width: 100%;
+    height: 12px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 99px;
+    overflow: hidden;
+    border: 2px solid var(--outline);
+  }
+  .timer-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #76FF03, #FFD600, #FF1744);
+    background-size: 300% 100%;
+    border-radius: 99px;
+    transition: width 0.1s linear;
+  }
+
+  /* Target letter */
+  .target-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .target-label {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 14px;
+    color: var(--card);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 1px 1px 0 var(--outline);
+  }
+  .target-letter {
+    font-size: 80px;
+    line-height: 1;
+    color: var(--card);
+    text-shadow: 5px 5px 0 var(--outline);
+    background: var(--primary);
+    border: 4px solid var(--outline);
+    border-radius: 20px;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 5px 5px 0 var(--outline);
+    animation: pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* Word Card */
+  .word-card {
+    background: var(--card);
+    border: 4px solid var(--outline);
+    border-radius: var(--radius);
+    box-shadow: 6px 6px 0 var(--outline);
+    width: 100%;
+    max-width: 340px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    animation: slide-up 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+  }
+
+  .word-image-wrap {
+    width: 160px;
+    height: 160px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 3px solid #E0E0E0;
+    background: #F5F5F5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .word-image-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .word-image-placeholder {
+    font-size: 80px;
+    line-height: 1;
+  }
+
+  .word-text {
+    font-size: 48px;
+    color: var(--text);
+    letter-spacing: 4px;
+    text-align: center;
+  }
+
+  .speak-btn {
+    background: #29B6F6;
+    border: 3px solid var(--outline);
+    border-radius: 50px;
+    padding: 10px 28px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 20px;
+    color: var(--card);
+    cursor: pointer;
+    box-shadow: 3px 3px 0 var(--outline);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  .speak-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 var(--outline);
+  }
+
+  /* Answer Buttons */
+  .answer-row {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    max-width: 340px;
+  }
+  .ans-btn {
+    flex: 1;
+    height: 90px;
+    border-radius: 20px;
+    border: 4px solid var(--outline);
+    font-family: 'Fredoka One', cursive;
+    font-size: 32px;
+    color: var(--card);
+    cursor: pointer;
+    box-shadow: 6px 6px 0 var(--outline);
+    transition: transform 0.1s, box-shadow 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .ans-btn:active {
+    transform: translate(4px, 4px);
+    box-shadow: 2px 2px 0 var(--outline);
+  }
+  .ans-btn.yes { background: var(--yes); }
+  .ans-btn.no  { background: var(--no); }
+  .ans-btn:disabled { opacity: 0.5; pointer-events: none; }
+
+  /* Feedback overlay */
+  .feedback-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .feedback-overlay.show { opacity: 1; }
+  .feedback-blob {
+    font-size: 120px;
+    animation: pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(0 0 30px rgba(0,0,0,0.3));
+  }
+
+  /* ========== RESULT SCREEN ========== */
+  #result-screen {
+    gap: 24px;
+    text-align: center;
+  }
+
+  .result-title {
+    font-size: 56px;
+    color: var(--card);
+    text-shadow: 5px 5px 0 var(--outline);
+    line-height: 1.1;
+    animation: bounce 0.8s ease-in-out infinite;
+  }
+
+  .result-card {
+    background: var(--card);
+    border: 4px solid var(--outline);
+    border-radius: var(--radius);
+    box-shadow: 8px 8px 0 var(--outline);
+    padding: 28px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 260px;
+  }
+  .result-score-label {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 16px;
+    color: #888;
+    letter-spacing: 2px;
+  }
+  .result-score {
+    font-size: 96px;
+    line-height: 1;
+    color: var(--primary);
+    text-shadow: 4px 4px 0 var(--outline);
+  }
+  .result-sub {
+    font-size: 20px;
+    color: var(--text);
+  }
+  .result-stars {
+    font-size: 40px;
+    letter-spacing: 6px;
+    animation: star-pop 0.5s ease backwards;
+  }
+
+  .result-message {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 22px;
+    color: var(--card);
+    text-shadow: 2px 2px 0 var(--outline);
+    background: rgba(0,0,0,0.15);
+    border-radius: 16px;
+    padding: 12px 24px;
+  }
+
+  .replay-btn {
+    padding: 22px 56px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 38px;
+    color: var(--card);
+    background: var(--primary);
+    border: 4px solid var(--outline);
+    border-radius: var(--radius);
+    cursor: pointer;
+    box-shadow: 7px 7px 0 var(--outline);
+    transition: transform 0.1s, box-shadow 0.1s;
+    animation: pulse-btn 1.5s ease-in-out infinite;
+  }
+  .replay-btn:active {
+    transform: translate(4px, 4px);
+    box-shadow: 3px 3px 0 var(--outline);
+    animation: none;
+  }
+
+  .back-btn {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--card);
+    background: transparent;
+    border: 3px solid rgba(255,255,255,0.5);
+    border-radius: 50px;
+    padding: 10px 28px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .back-btn:hover { background: rgba(255,255,255,0.2); }
+
+  /* ========== CONFETTI ========== */
+  .confetti-container {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 200;
+    overflow: hidden;
+  }
+  .confetti-piece {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    top: -20px;
+    animation: confetti-fall linear forwards;
+  }
+
+  /* ========== ANIMATIONS ========== */
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes pop-in {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes slide-up {
+    0% { transform: translateY(60px) scale(0.9); opacity: 0; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+  }
+  @keyframes pulse-btn {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px) rotate(-3deg); }
+    75% { transform: translateX(3px) rotate(3deg); }
+  }
+  @keyframes star-pop {
+    0% { transform: scale(0); opacity: 0; }
+    80% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes confetti-fall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0.3; }
+  }
+  @keyframes wrong-flash {
+    0%, 100% { background: var(--no); }
+    50% { background: #FF8A80; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== START SCREEN ===== -->
+<div id="start-screen" class="screen active">
+  <div class="game-title">🔤<br>Phonics!</div>
+  <div class="game-subtitle">レッスン前のウォームアップ</div>
+  <div class="letter-selector-label">もじをえらんでね</div>
+  <div class="letter-grid" id="letter-grid"></div>
+  <button class="start-btn" id="start-btn" disabled>あそぶ！▶</button>
+</div>
+
+<!-- ===== GAME SCREEN ===== -->
+<div id="game-screen" class="screen">
+  <!-- HUD -->
+  <div class="hud">
+    <div class="score-box">
+      <span>せいかい</span>
+      <span id="score-num">0</span>
+    </div>
+    <div class="timer-wrap">
+      <div class="timer-num" id="timer-num">30</div>
+      <div class="timer-bar-bg"><div class="timer-bar" id="timer-bar"></div></div>
+    </div>
+    <div class="score-box">
+      <span>もんだい</span>
+      <span id="q-num">0</span>
+    </div>
+  </div>
+
+  <!-- Target Letter -->
+  <div class="target-wrap">
+    <div class="target-label">ターゲット</div>
+    <div class="target-letter" id="target-letter">A</div>
+  </div>
+
+  <!-- Word Card -->
+  <div class="word-card" id="word-card">
+    <div class="word-image-wrap" id="word-image-wrap">
+      <div class="word-image-placeholder" id="word-placeholder">❓</div>
+    </div>
+    <div class="word-text" id="word-text">---</div>
+    <button class="speak-btn" id="speak-btn" onclick="speakWord()">🔊 もういちど</button>
+  </div>
+
+  <!-- Answer Buttons -->
+  <div class="answer-row">
+    <button class="ans-btn yes" id="btn-yes" onclick="answer(true)">✅ YES</button>
+    <button class="ans-btn no"  id="btn-no"  onclick="answer(false)">❌ NO</button>
+  </div>
+</div>
+
+<!-- ===== RESULT SCREEN ===== -->
+<div id="result-screen" class="screen">
+  <div class="result-title" id="result-title">🎉<br>やったー!</div>
+  <div class="result-card">
+    <div class="result-score-label">SCORE</div>
+    <div class="result-score" id="result-score">0</div>
+    <div class="result-sub" id="result-sub">もんだい / 0 もん</div>
+    <div class="result-stars" id="result-stars">⭐⭐⭐</div>
+  </div>
+  <div class="result-message" id="result-message">すごい！</div>
+  <button class="replay-btn" id="replay-btn" onclick="replay()">もういちど！🔄</button>
+  <button class="back-btn" onclick="goHome()">もじをかえる</button>
+</div>
+
+<!-- Feedback overlay -->
+<div class="feedback-overlay" id="feedback-overlay">
+  <div class="feedback-blob" id="feedback-blob"></div>
+</div>
+
+<!-- Confetti container -->
+<div class="confetti-container" id="confetti-container"></div>
+
+<script src="data/lessons.js"></script>
+<script>
+// ============================================================
+// CONFIG
+// ============================================================
+const GAME_DURATION = 30; // seconds
+const IMAGE_DIR = "images/words/";
+const IMAGE_EXT = ".png";
+
+// Fallback emoji when image not found
+const WORD_EMOJI = {
+  apple:"🍎", ant:"🐜", cat:"🐱", dog:"🐶", fish:"🐟",
+  bed:"🛏️", cup:"☕", fox:"🦊", bat:"🦇", ball:"⚽",
+  bus:"🚌", book:"📚", car:"🚗", cake:"🎂", cow:"🐄",
+  sun:"☀️", hat:"🎩", map:"🗺️", bag:"👜"
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+  selectedLetter: null,
+  currentWords: [],
+  wordIndex: 0,
+  score: 0,
+  total: 0,
+  timer: null,
+  timeLeft: GAME_DURATION,
+  currentWord: null,
+  answering: true,
+};
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  const grid = document.getElementById('letter-grid');
+  grid.innerHTML = '';
+  Object.keys(LESSONS).forEach(letter => {
+    const btn = document.createElement('button');
+    btn.className = 'letter-btn';
+    btn.textContent = letter;
+    btn.onclick = () => selectLetter(letter, btn);
+    grid.appendChild(btn);
+  });
+  state.selectedLetter = null;
+  document.getElementById('start-btn').disabled = true;
+}
+
+function selectLetter(letter, el) {
+  document.querySelectorAll('.letter-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  state.selectedLetter = letter;
+  document.getElementById('start-btn').disabled = false;
+}
+
+// ============================================================
+// GAME START
+// ============================================================
+document.getElementById('start-btn').addEventListener('click', startGame);
+
+function startGame() {
+  if (!state.selectedLetter) return;
+
+  const lesson = LESSONS[state.selectedLetter];
+  // Shuffle words
+  state.currentWords = shuffle([...lesson.words]);
+  state.wordIndex = 0;
+  state.score = 0;
+  state.total = 0;
+  state.timeLeft = GAME_DURATION;
+
+  document.getElementById('target-letter').textContent = state.selectedLetter;
+  document.getElementById('score-num').textContent = '0';
+  document.getElementById('q-num').textContent = '0';
+  updateTimerBar();
+
+  showScreen('game-screen');
+  nextWord();
+  startTimer();
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ============================================================
+// WORD
+// ============================================================
+function nextWord() {
+  if (state.wordIndex >= state.currentWords.length) {
+    // Re-shuffle and continue
+    state.currentWords = shuffle([...LESSONS[state.selectedLetter].words]);
+    state.wordIndex = 0;
+  }
+
+  state.currentWord = state.currentWords[state.wordIndex++];
+  state.answering = true;
+
+  setButtons(true);
+  displayWord(state.currentWord.word);
+  speakWord();
+}
+
+function displayWord(word) {
+  document.getElementById('word-text').textContent = word;
+
+  const wrap = document.getElementById('word-image-wrap');
+  const placeholder = document.getElementById('word-placeholder');
+  const imgPath = IMAGE_DIR + word + IMAGE_EXT;
+
+  // Try loading image
+  const img = new Image();
+  img.onload = () => {
+    wrap.innerHTML = '';
+    const el = document.createElement('img');
+    el.src = imgPath;
+    el.alt = word;
+    wrap.appendChild(el);
+  };
+  img.onerror = () => {
+    wrap.innerHTML = '';
+    const pl = document.createElement('div');
+    pl.className = 'word-image-placeholder';
+    pl.textContent = WORD_EMOJI[word] || '🔤';
+    wrap.appendChild(pl);
+  };
+  img.src = imgPath;
+
+  // Re-trigger card animation
+  const card = document.getElementById('word-card');
+  card.style.animation = 'none';
+  card.offsetHeight; // reflow
+  card.style.animation = '';
+}
+
+// ============================================================
+// AUDIO (Google TTS)
+// ============================================================
+let currentAudio = null;
+function speakWord() {
+  if (!state.currentWord) return;
+  const word = state.currentWord.word;
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  // Use Google Translate TTS
+  const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(word)}&tl=en-us&client=tw-ob`;
+  const audio = new Audio(url);
+  audio.play().catch(() => {
+    // Fallback: Web Speech API
+    const utter = new SpeechSynthesisUtterance(word);
+    utter.lang = 'en-US';
+    utter.rate = 0.85;
+    speechSynthesis.speak(utter);
+  });
+  currentAudio = audio;
+}
+
+// ============================================================
+// ANSWER
+// ============================================================
+function answer(userSaysYes) {
+  if (!state.answering) return;
+  state.answering = false;
+  setButtons(false);
+
+  const correct = (userSaysYes === state.currentWord.hasTarget);
+  state.total++;
+  document.getElementById('q-num').textContent = state.total;
+
+  if (correct) {
+    state.score++;
+    document.getElementById('score-num').textContent = state.score;
+    showFeedback('✅', true);
+  } else {
+    showFeedback('❌', false);
+  }
+
+  setTimeout(() => {
+    hideFeedback();
+    nextWord();
+  }, 700);
+}
+
+function setButtons(enabled) {
+  document.getElementById('btn-yes').disabled = !enabled;
+  document.getElementById('btn-no').disabled = !enabled;
+}
+
+// ============================================================
+// FEEDBACK
+// ============================================================
+function showFeedback(emoji, ok) {
+  const overlay = document.getElementById('feedback-overlay');
+  const blob = document.getElementById('feedback-blob');
+  blob.textContent = emoji;
+  blob.style.animation = 'none';
+  blob.offsetHeight;
+  blob.style.animation = '';
+  overlay.classList.add('show');
+}
+
+function hideFeedback() {
+  document.getElementById('feedback-overlay').classList.remove('show');
+}
+
+// ============================================================
+// TIMER
+// ============================================================
+function startTimer() {
+  if (state.timer) clearInterval(state.timer);
+  state.timeLeft = GAME_DURATION;
+  updateTimerDisplay();
+  state.timer = setInterval(() => {
+    state.timeLeft -= 0.1;
+    if (state.timeLeft <= 0) {
+      state.timeLeft = 0;
+      updateTimerDisplay();
+      clearInterval(state.timer);
+      endGame();
+    } else {
+      updateTimerDisplay();
+    }
+  }, 100);
+}
+
+function updateTimerDisplay() {
+  const n = Math.ceil(state.timeLeft);
+  const el = document.getElementById('timer-num');
+  el.textContent = n;
+  el.classList.toggle('warning', n <= 5);
+  updateTimerBar();
+}
+
+function updateTimerBar() {
+  const pct = (state.timeLeft / GAME_DURATION) * 100;
+  document.getElementById('timer-bar').style.width = Math.max(0, pct) + '%';
+}
+
+// ============================================================
+// END GAME
+// ============================================================
+function endGame() {
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  setButtons(false);
+
+  const ratio = state.total > 0 ? state.score / state.total : 0;
+  let stars = '⭐';
+  let title = 'おわり！';
+  let message = 'もう一回やってみよう！';
+
+  if (ratio >= 0.9) {
+    stars = '⭐⭐⭐';
+    title = '🎉 すごい！！';
+    message = 'パーフェクトに近い！！';
+    launchConfetti();
+  } else if (ratio >= 0.7) {
+    stars = '⭐⭐';
+    title = '😄 よくできました！';
+    message = 'どんどん上手になってるよ！';
+  } else {
+    stars = '⭐';
+    title = '😊 がんばれ！';
+    message = 'もう一回チャレンジしよう！';
+  }
+
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-score').textContent = state.score;
+  document.getElementById('result-sub').textContent = `もんだい ${state.total} もん`;
+  document.getElementById('result-stars').textContent = stars;
+  document.getElementById('result-message').textContent = message;
+
+  showScreen('result-screen');
+}
+
+// ============================================================
+// CONFETTI
+// ============================================================
+function launchConfetti() {
+  const container = document.getElementById('confetti-container');
+  container.innerHTML = '';
+  const colors = ['#FF6F00','#FFD600','#00C853','#2979FF','#FF1744','#AA00FF'];
+  for (let i = 0; i < 60; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.width = (8 + Math.random() * 12) + 'px';
+    piece.style.height = (8 + Math.random() * 12) + 'px';
+    piece.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    piece.style.animationDelay = (Math.random() * 0.8) + 's';
+    container.appendChild(piece);
+  }
+  setTimeout(() => container.innerHTML = '', 4000);
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function replay() {
+  startGame();
+}
+
+function goHome() {
+  if (state.timer) clearInterval(state.timer);
+  showScreen('start-screen');
+  init();
+}
+
+// ============================================================
+// BOOT
+// ============================================================
+init();
+</script>
+</body>
+</html>
