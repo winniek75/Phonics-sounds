@@ -361,6 +361,22 @@
 
 <!-- ===== GAME SCREEN ===== -->
 <div id="game-screen" class="screen">
+  <!-- 戻るボタン追加 -->
+  <div style="width: 100%; display: flex; justify-content: flex-start; margin-bottom: 10px;">
+    <button onclick="goHome()" style="
+      padding: 8px 16px;
+      font-size: 18px;
+      color: #FFF;
+      background: #FF6F00;
+      border: 3px solid #212121;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 3px 3px 0 #212121;
+      font-family: 'Fredoka One', cursive;
+      transition: transform 0.1s, box-shadow 0.1s;
+    ">← もどる</button>
+  </div>
+
   <div class="hud">
     <div class="score-box"><span>せいかい</span><span id="score-num">0</span></div>
     <div class="timer-wrap">
@@ -379,7 +395,7 @@
     <div class="word-image-wrap" id="word-image-wrap">
       <div class="word-image-placeholder">❓</div>
     </div>
-    <div class="word-text" id="word-text">---</div>
+    <!-- <div class="word-text" id="word-text">---</div> --> <!-- 単語テキストを非表示 -->
     <button class="speak-btn" onclick="speakWord()">🔊 もういちど</button>
   </div>
 
@@ -711,7 +727,7 @@ function nextWord() {
 }
 
 function displayWord(word) {
-  document.getElementById('word-text').textContent = word;
+  // document.getElementById('word-text').textContent = word; // 単語テキスト表示を無効化
   const wrap = document.getElementById('word-image-wrap');
   const imgPath = IMAGE_DIR + word + IMAGE_EXT;
   const img = new Image();

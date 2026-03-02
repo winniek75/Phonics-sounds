@@ -1,0 +1,71 @@
+# Phonics Sounds Game - 単語リスト
+# このゲームで使用される単語の一覧
+
+## 現在のデータ（lessons.js より抽出）
+
+### A音のグループ
+- apple
+- cat
+- ant
+- map
+- bag
+- dog
+- fish
+- bed
+- cup
+- fox
+
+### B音のグループ
+- bat
+- ball
+- bus
+- bed
+- book
+- cat
+- dog
+- fish
+- hat
+- sun
+
+### C音のグループ
+- cat
+- cup
+- car
+- cake
+- cow
+- dog
+- fish
+- hat
+- sun
+- ball
+
+## 重複を除いた全単語リスト（アルファベット順）
+1. ant
+2. apple
+3. bag
+4. ball
+5. bat
+6. bed
+7. book
+8. bus
+9. cake
+10. car
+11. cat
+12. cow
+13. cup
+14. dog
+15. fish
+16. fox
+17. hat
+18. map
+19. sun
+
+## 画像ファイルの準備について
+- 各単語に対応する画像が必要です
+- 画像ファイルの場所: `images/words/` ディレクトリ
+- ファイル名形式: `{単語}.png`
+- 例: `images/words/apple.png`, `images/words/cat.png`
+
+## 注意事項
+- 現在のlessons.jsには3つのグループ（A, B, C）のみ定義されています
+- さらに多くの単語やグループを追加する場合は、lessons.jsファイルを編集してください
