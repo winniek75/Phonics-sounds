@@ -7,18 +7,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #FFF176;
-    --bg2: #FFE0B2;
     --primary: #FF6F00;
-    --primary-dark: #E65100;
     --yes: #00C853;
-    --yes-dark: #007B33;
     --no: #FF1744;
-    --no-dark: #C40039;
     --card: #FFFFFF;
     --text: #212121;
     --outline: #212121;
-    --shadow: 5px 5px 0px #212121;
     --radius: 24px;
   }
 
@@ -36,89 +30,132 @@
     -webkit-user-select: none;
   }
 
-  /* ========== SCREENS ========== */
   .screen {
     display: none;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     width: 100%;
-    max-width: 480px;
+    max-width: 520px;
     min-height: 100vh;
-    padding: 24px;
+    padding: 20px 16px 32px;
     position: absolute;
     top: 0; left: 50%; transform: translateX(-50%);
+    overflow-y: auto;
   }
   .screen.active { display: flex; }
 
   /* ========== START SCREEN ========== */
-  #start-screen {
-    gap: 28px;
+  #start-screen { gap: 14px; padding-top: 24px; }
+
+  .game-title {
+    font-size: 54px;
+    color: var(--card);
+    text-shadow: 4px 4px 0 var(--outline);
+    animation: bounce 1.4s ease-in-out infinite;
+    line-height: 1;
     text-align: center;
   }
 
-  .game-title {
-    font-size: 64px;
-    color: var(--card);
-    text-shadow: 4px 4px 0 var(--outline);
-    animation: bounce 1.2s ease-in-out infinite;
-    line-height: 1;
-  }
-
-  .game-subtitle {
-    font-family: 'Nunito', sans-serif;
-    font-weight: 900;
-    font-size: 18px;
-    color: var(--text);
-    background: var(--card);
-    border: 3px solid var(--outline);
-    border-radius: 16px;
-    padding: 10px 24px;
-    box-shadow: var(--shadow);
-  }
-
   .letter-selector-label {
-    font-size: 20px;
+    font-size: 17px;
     color: var(--card);
     text-shadow: 2px 2px 0 var(--outline);
+    text-align: center;
   }
 
-  .letter-grid {
+  .groups-wrap {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .group-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .group-badge {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 11px;
+    color: var(--card);
+    border-radius: 8px;
+    padding: 6px 5px;
+    min-width: 28px;
+    text-align: center;
+    border: 2px solid var(--outline);
+    box-shadow: 2px 2px 0 var(--outline);
+    line-height: 1.3;
+    writing-mode: vertical-rl;
+    letter-spacing: 1px;
+    flex-shrink: 0;
+  }
+
+  .group-letters {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
-    justify-content: center;
-    max-width: 360px;
+    gap: 6px;
+    flex: 1;
   }
 
   .letter-btn {
-    width: 72px;
-    height: 72px;
-    border-radius: 16px;
-    border: 4px solid var(--outline);
+    min-width: 50px;
+    height: 50px;
+    padding: 0 8px;
+    border-radius: 11px;
+    border: 3px solid var(--outline);
     background: var(--card);
     font-family: 'Fredoka One', cursive;
-    font-size: 36px;
+    font-size: 24px;
     color: var(--text);
     cursor: pointer;
-    box-shadow: 5px 5px 0 var(--outline);
+    box-shadow: 4px 4px 0 var(--outline);
     transition: transform 0.1s, box-shadow 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: relative;
+    overflow: hidden;
   }
-  .letter-btn:active, .letter-btn.selected {
+  .letter-btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: var(--gcolor, #999);
+  }
+  .letter-btn.digraph { font-size: 17px; min-width: 58px; }
+  .letter-btn:active {
     transform: translate(3px, 3px);
-    box-shadow: 2px 2px 0 var(--outline);
-    background: #FFE57F;
+    box-shadow: 1px 1px 0 var(--outline);
   }
   .letter-btn.selected {
-    background: #FFCA28;
-    border-color: var(--primary);
+    transform: translate(3px, 3px);
+    box-shadow: 1px 1px 0 var(--outline);
+    background: #FFF9C4;
+    border-color: var(--gcolor, #999);
+  }
+  .letter-btn.selected::after {
+    content: '✓';
+    position: absolute;
+    top: -1px; right: 2px;
+    font-size: 12px;
+    color: var(--gcolor, #999);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    line-height: 1;
+  }
+  .letter-btn.no-data {
+    opacity: 0.3;
+    cursor: default;
   }
 
   .start-btn {
-    padding: 20px 56px;
+    padding: 16px 48px;
     font-family: 'Fredoka One', cursive;
-    font-size: 36px;
+    font-size: 32px;
     color: var(--card);
     background: var(--primary);
     border: 4px solid var(--outline);
@@ -127,375 +164,188 @@
     box-shadow: 6px 6px 0 var(--outline);
     transition: transform 0.1s, box-shadow 0.1s;
     animation: pulse-btn 2s ease-in-out infinite;
+    margin-top: 6px;
   }
-  .start-btn:active {
-    transform: translate(4px, 4px);
-    box-shadow: 2px 2px 0 var(--outline);
-    animation: none;
-  }
-  .start-btn:disabled {
-    opacity: 0.4;
-    animation: none;
-    cursor: not-allowed;
-  }
+  .start-btn:active { transform: translate(4px,4px); box-shadow: 2px 2px 0 var(--outline); animation: none; }
+  .start-btn:disabled { opacity: 0.4; animation: none; cursor: not-allowed; }
 
   /* ========== GAME SCREEN ========== */
-  #game-screen {
-    gap: 16px;
-    padding: 20px;
-  }
+  #game-screen { gap: 14px; padding: 20px; justify-content: center; }
 
   .hud {
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: 10px;
   }
-
   .score-box {
     background: var(--card);
     border: 3px solid var(--outline);
     border-radius: 14px;
-    padding: 8px 20px;
-    font-size: 24px;
+    padding: 6px 14px;
+    font-size: 26px;
     color: var(--text);
     box-shadow: 3px 3px 0 var(--outline);
-    min-width: 80px;
+    min-width: 70px;
     text-align: center;
   }
   .score-box span {
-    font-size: 14px;
-    display: block;
-    font-family: 'Nunito', sans-serif;
-    font-weight: 700;
-    color: #888;
+    font-size: 11px; display: block;
+    font-family: 'Nunito', sans-serif; font-weight: 700; color: #888;
   }
-
-  /* Timer */
   .timer-wrap {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
   }
   .timer-num {
-    font-size: 40px;
-    color: var(--card);
-    text-shadow: 3px 3px 0 var(--outline);
-    line-height: 1;
-    transition: color 0.3s;
+    font-size: 40px; color: var(--card);
+    text-shadow: 3px 3px 0 var(--outline); line-height: 1;
   }
-  .timer-num.warning { color: #FF1744; animation: shake 0.3s ease infinite; }
+  .timer-num.warning { color: #FF1744; animation: shake 0.25s ease infinite; }
   .timer-bar-bg {
-    width: 100%;
-    height: 12px;
-    background: rgba(0,0,0,0.2);
-    border-radius: 99px;
-    overflow: hidden;
-    border: 2px solid var(--outline);
+    width: 100%; height: 12px; background: rgba(0,0,0,0.2);
+    border-radius: 99px; overflow: hidden; border: 2px solid var(--outline);
   }
   .timer-bar {
     height: 100%;
     background: linear-gradient(90deg, #76FF03, #FFD600, #FF1744);
-    background-size: 300% 100%;
-    border-radius: 99px;
-    transition: width 0.1s linear;
+    border-radius: 99px; transition: width 0.1s linear;
   }
 
-  /* Target letter */
-  .target-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-  }
+  .target-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
   .target-label {
-    font-family: 'Nunito', sans-serif;
-    font-weight: 900;
-    font-size: 14px;
-    color: var(--card);
-    text-transform: uppercase;
-    letter-spacing: 2px;
+    font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 12px;
+    color: var(--card); text-transform: uppercase; letter-spacing: 2px;
     text-shadow: 1px 1px 0 var(--outline);
   }
   .target-letter {
-    font-size: 80px;
-    line-height: 1;
-    color: var(--card);
-    text-shadow: 5px 5px 0 var(--outline);
+    font-size: 64px; line-height: 1;
+    color: var(--card); text-shadow: 4px 4px 0 var(--outline);
     background: var(--primary);
-    border: 4px solid var(--outline);
-    border-radius: 20px;
-    width: 100px;
-    height: 100px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    border: 4px solid var(--outline); border-radius: 20px;
+    min-width: 100px; height: 100px; padding: 0 16px;
+    display: flex; align-items: center; justify-content: center;
     box-shadow: 5px 5px 0 var(--outline);
     animation: pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
+  .target-letter.digraph { font-size: 42px; min-width: 120px; }
 
-  /* Word Card */
   .word-card {
-    background: var(--card);
-    border: 4px solid var(--outline);
-    border-radius: var(--radius);
-    box-shadow: 6px 6px 0 var(--outline);
-    width: 100%;
-    max-width: 340px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
+    background: var(--card); border: 4px solid var(--outline);
+    border-radius: var(--radius); box-shadow: 6px 6px 0 var(--outline);
+    width: 100%; max-width: 340px; padding: 18px;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
     animation: slide-up 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    position: relative;
   }
-
   .word-image-wrap {
-    width: 160px;
-    height: 160px;
-    border-radius: 16px;
-    overflow: hidden;
-    border: 3px solid #E0E0E0;
-    background: #F5F5F5;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 148px; height: 148px; border-radius: 14px; overflow: hidden;
+    border: 3px solid #E0E0E0; background: #F5F5F5;
+    display: flex; align-items: center; justify-content: center;
   }
-  .word-image-wrap img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .word-image-placeholder {
-    font-size: 80px;
-    line-height: 1;
-  }
-
-  .word-text {
-    font-size: 48px;
-    color: var(--text);
-    letter-spacing: 4px;
-    text-align: center;
-  }
-
+  .word-image-wrap img { width: 100%; height: 100%; object-fit: cover; }
+  .word-image-placeholder { font-size: 74px; line-height: 1; }
+  .word-text { font-size: 46px; color: var(--text); letter-spacing: 3px; text-align: center; }
   .speak-btn {
-    background: #29B6F6;
-    border: 3px solid var(--outline);
-    border-radius: 50px;
-    padding: 10px 28px;
-    font-family: 'Fredoka One', cursive;
-    font-size: 20px;
-    color: var(--card);
-    cursor: pointer;
-    box-shadow: 3px 3px 0 var(--outline);
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    background: #29B6F6; border: 3px solid var(--outline); border-radius: 50px;
+    padding: 8px 22px; font-family: 'Fredoka One', cursive; font-size: 18px;
+    color: var(--card); cursor: pointer; box-shadow: 3px 3px 0 var(--outline);
+    display: flex; align-items: center; gap: 6px;
     transition: transform 0.1s, box-shadow 0.1s;
   }
-  .speak-btn:active {
-    transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0 var(--outline);
-  }
+  .speak-btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--outline); }
 
-  /* Answer Buttons */
-  .answer-row {
-    display: flex;
-    gap: 16px;
-    width: 100%;
-    max-width: 340px;
-  }
+  .answer-row { display: flex; gap: 14px; width: 100%; max-width: 340px; }
   .ans-btn {
-    flex: 1;
-    height: 90px;
-    border-radius: 20px;
-    border: 4px solid var(--outline);
-    font-family: 'Fredoka One', cursive;
-    font-size: 32px;
-    color: var(--card);
-    cursor: pointer;
-    box-shadow: 6px 6px 0 var(--outline);
+    flex: 1; height: 84px; border-radius: 18px; border: 4px solid var(--outline);
+    font-family: 'Fredoka One', cursive; font-size: 28px; color: var(--card);
+    cursor: pointer; box-shadow: 6px 6px 0 var(--outline);
     transition: transform 0.1s, box-shadow 0.1s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
   }
-  .ans-btn:active {
-    transform: translate(4px, 4px);
-    box-shadow: 2px 2px 0 var(--outline);
-  }
+  .ans-btn:active { transform: translate(4px,4px); box-shadow: 2px 2px 0 var(--outline); }
   .ans-btn.yes { background: var(--yes); }
   .ans-btn.no  { background: var(--no); }
   .ans-btn:disabled { opacity: 0.5; pointer-events: none; }
 
-  /* Feedback overlay */
+  /* ========== RESULT SCREEN ========== */
+  #result-screen { gap: 20px; text-align: center; justify-content: center; }
+  .result-title {
+    font-size: 50px; color: var(--card);
+    text-shadow: 5px 5px 0 var(--outline); line-height: 1.1;
+    animation: bounce 0.9s ease-in-out infinite;
+  }
+  .result-card {
+    background: var(--card); border: 4px solid var(--outline);
+    border-radius: var(--radius); box-shadow: 8px 8px 0 var(--outline);
+    padding: 22px 36px; display: flex; flex-direction: column; align-items: center; gap: 5px;
+    min-width: 230px;
+  }
+  .result-score-label { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 13px; color: #888; letter-spacing: 2px; }
+  .result-score { font-size: 84px; line-height: 1; color: var(--primary); text-shadow: 4px 4px 0 var(--outline); }
+  .result-sub { font-size: 17px; color: var(--text); }
+  .result-stars { font-size: 34px; letter-spacing: 6px; }
+  .result-message {
+    font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 19px;
+    color: var(--card); text-shadow: 2px 2px 0 var(--outline);
+    background: rgba(0,0,0,0.15); border-radius: 14px; padding: 10px 20px;
+  }
+  .replay-btn {
+    padding: 18px 48px; font-family: 'Fredoka One', cursive; font-size: 34px;
+    color: var(--card); background: var(--primary); border: 4px solid var(--outline);
+    border-radius: var(--radius); cursor: pointer; box-shadow: 7px 7px 0 var(--outline);
+    transition: transform 0.1s, box-shadow 0.1s; animation: pulse-btn 1.5s ease-in-out infinite;
+  }
+  .replay-btn:active { transform: translate(4px,4px); box-shadow: 3px 3px 0 var(--outline); animation: none; }
+  .back-btn {
+    font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 16px;
+    color: var(--card); background: transparent;
+    border: 3px solid rgba(255,255,255,0.5); border-radius: 50px; padding: 10px 24px; cursor: pointer;
+  }
+
+  /* ========== FEEDBACK ========== */
   .feedback-overlay {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.15s;
+    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+    z-index: 100; pointer-events: none; opacity: 0; transition: opacity 0.15s;
   }
   .feedback-overlay.show { opacity: 1; }
   .feedback-blob {
     font-size: 120px;
     animation: pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    filter: drop-shadow(0 0 30px rgba(0,0,0,0.3));
+    filter: drop-shadow(0 0 30px rgba(0,0,0,0.2));
   }
-
-  /* ========== RESULT SCREEN ========== */
-  #result-screen {
-    gap: 24px;
-    text-align: center;
-  }
-
-  .result-title {
-    font-size: 56px;
-    color: var(--card);
-    text-shadow: 5px 5px 0 var(--outline);
-    line-height: 1.1;
-    animation: bounce 0.8s ease-in-out infinite;
-  }
-
-  .result-card {
-    background: var(--card);
-    border: 4px solid var(--outline);
-    border-radius: var(--radius);
-    box-shadow: 8px 8px 0 var(--outline);
-    padding: 28px 40px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    min-width: 260px;
-  }
-  .result-score-label {
-    font-family: 'Nunito', sans-serif;
-    font-weight: 900;
-    font-size: 16px;
-    color: #888;
-    letter-spacing: 2px;
-  }
-  .result-score {
-    font-size: 96px;
-    line-height: 1;
-    color: var(--primary);
-    text-shadow: 4px 4px 0 var(--outline);
-  }
-  .result-sub {
-    font-size: 20px;
-    color: var(--text);
-  }
-  .result-stars {
-    font-size: 40px;
-    letter-spacing: 6px;
-    animation: star-pop 0.5s ease backwards;
-  }
-
-  .result-message {
-    font-family: 'Nunito', sans-serif;
-    font-weight: 900;
-    font-size: 22px;
-    color: var(--card);
-    text-shadow: 2px 2px 0 var(--outline);
-    background: rgba(0,0,0,0.15);
-    border-radius: 16px;
-    padding: 12px 24px;
-  }
-
-  .replay-btn {
-    padding: 22px 56px;
-    font-family: 'Fredoka One', cursive;
-    font-size: 38px;
-    color: var(--card);
-    background: var(--primary);
-    border: 4px solid var(--outline);
-    border-radius: var(--radius);
-    cursor: pointer;
-    box-shadow: 7px 7px 0 var(--outline);
-    transition: transform 0.1s, box-shadow 0.1s;
-    animation: pulse-btn 1.5s ease-in-out infinite;
-  }
-  .replay-btn:active {
-    transform: translate(4px, 4px);
-    box-shadow: 3px 3px 0 var(--outline);
-    animation: none;
-  }
-
-  .back-btn {
-    font-family: 'Nunito', sans-serif;
-    font-weight: 700;
-    font-size: 18px;
-    color: var(--card);
-    background: transparent;
-    border: 3px solid rgba(255,255,255,0.5);
-    border-radius: 50px;
-    padding: 10px 28px;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  .back-btn:hover { background: rgba(255,255,255,0.2); }
 
   /* ========== CONFETTI ========== */
-  .confetti-container {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 200;
-    overflow: hidden;
-  }
+  .confetti-container { position: fixed; inset: 0; pointer-events: none; z-index: 200; overflow: hidden; }
   .confetti-piece {
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    border-radius: 3px;
-    top: -20px;
+    position: absolute; border-radius: 3px; top: -20px;
     animation: confetti-fall linear forwards;
   }
 
   /* ========== ANIMATIONS ========== */
   @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(-10px); }
   }
   @keyframes pop-in {
-    0% { transform: scale(0); opacity: 0; }
+    0%   { transform: scale(0); opacity: 0; }
     100% { transform: scale(1); opacity: 1; }
   }
   @keyframes slide-up {
-    0% { transform: translateY(60px) scale(0.9); opacity: 0; }
+    0%   { transform: translateY(50px) scale(0.92); opacity: 0; }
     100% { transform: translateY(0) scale(1); opacity: 1; }
   }
   @keyframes pulse-btn {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.04); }
+    0%,100% { transform: scale(1); }
+    50%     { transform: scale(1.04); }
   }
   @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-3px) rotate(-3deg); }
-    75% { transform: translateX(3px) rotate(3deg); }
-  }
-  @keyframes star-pop {
-    0% { transform: scale(0); opacity: 0; }
-    80% { transform: scale(1.2); }
-    100% { transform: scale(1); opacity: 1; }
+    0%,100% { transform: translateX(0); }
+    25%     { transform: translateX(-3px) rotate(-3deg); }
+    75%     { transform: translateX(3px) rotate(3deg); }
   }
   @keyframes confetti-fall {
-    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
     100% { transform: translateY(110vh) rotate(720deg); opacity: 0.3; }
-  }
-  @keyframes wrong-flash {
-    0%, 100% { background: var(--no); }
-    50% { background: #FF8A80; }
   }
 </style>
 </head>
@@ -503,47 +353,36 @@
 
 <!-- ===== START SCREEN ===== -->
 <div id="start-screen" class="screen active">
-  <div class="game-title">🔤<br>Phonics!</div>
-  <div class="game-subtitle">レッスン前のウォームアップ</div>
-  <div class="letter-selector-label">もじをえらんでね</div>
-  <div class="letter-grid" id="letter-grid"></div>
+  <div class="game-title">🔤 Phonics!</div>
+  <div class="letter-selector-label">れんしゅうする もじを えらんでね</div>
+  <div class="groups-wrap" id="groups-wrap"></div>
   <button class="start-btn" id="start-btn" disabled>あそぶ！▶</button>
 </div>
 
 <!-- ===== GAME SCREEN ===== -->
 <div id="game-screen" class="screen">
-  <!-- HUD -->
   <div class="hud">
-    <div class="score-box">
-      <span>せいかい</span>
-      <span id="score-num">0</span>
-    </div>
+    <div class="score-box"><span>せいかい</span><span id="score-num">0</span></div>
     <div class="timer-wrap">
       <div class="timer-num" id="timer-num">30</div>
       <div class="timer-bar-bg"><div class="timer-bar" id="timer-bar"></div></div>
     </div>
-    <div class="score-box">
-      <span>もんだい</span>
-      <span id="q-num">0</span>
-    </div>
+    <div class="score-box"><span>もんだい</span><span id="q-num">0</span></div>
   </div>
 
-  <!-- Target Letter -->
   <div class="target-wrap">
     <div class="target-label">ターゲット</div>
-    <div class="target-letter" id="target-letter">A</div>
+    <div class="target-letter" id="target-letter">s</div>
   </div>
 
-  <!-- Word Card -->
   <div class="word-card" id="word-card">
     <div class="word-image-wrap" id="word-image-wrap">
-      <div class="word-image-placeholder" id="word-placeholder">❓</div>
+      <div class="word-image-placeholder">❓</div>
     </div>
     <div class="word-text" id="word-text">---</div>
-    <button class="speak-btn" id="speak-btn" onclick="speakWord()">🔊 もういちど</button>
+    <button class="speak-btn" onclick="speakWord()">🔊 もういちど</button>
   </div>
 
-  <!-- Answer Buttons -->
   <div class="answer-row">
     <button class="ans-btn yes" id="btn-yes" onclick="answer(true)">✅ YES</button>
     <button class="ans-btn no"  id="btn-no"  onclick="answer(false)">❌ NO</button>
@@ -556,129 +395,269 @@
   <div class="result-card">
     <div class="result-score-label">SCORE</div>
     <div class="result-score" id="result-score">0</div>
-    <div class="result-sub" id="result-sub">もんだい / 0 もん</div>
+    <div class="result-sub" id="result-sub">もんだい 0 もん</div>
     <div class="result-stars" id="result-stars">⭐⭐⭐</div>
   </div>
   <div class="result-message" id="result-message">すごい！</div>
-  <button class="replay-btn" id="replay-btn" onclick="replay()">もういちど！🔄</button>
+  <button class="replay-btn" onclick="replay()">もういちど！🔄</button>
   <button class="back-btn" onclick="goHome()">もじをかえる</button>
 </div>
 
-<!-- Feedback overlay -->
 <div class="feedback-overlay" id="feedback-overlay">
   <div class="feedback-blob" id="feedback-blob"></div>
 </div>
-
-<!-- Confetti container -->
 <div class="confetti-container" id="confetti-container"></div>
 
 <script>
 // ============================================================
-// 単語データ（data/lessons.js の内容をここに統合）
-// 新しい文字を追加する場合はこのブロックを編集してください
+// ジョリーフォニックス 7グループ
+// ============================================================
+const JP_GROUPS = [
+  { label: 'G1', color: '#E53935', sounds: ['s','a','t','i','p','n'] },
+  { label: 'G2', color: '#1E88E5', sounds: ['ck','e','h','r','m','d'] },
+  { label: 'G3', color: '#43A047', sounds: ['g','o','u','l','f','b'] },
+  { label: 'G4', color: '#FB8C00', sounds: ['ai','j','oa','ie','ee','or'] },
+  { label: 'G5', color: '#8E24AA', sounds: ['z','w','ng','v','oo'] },
+  { label: 'G6', color: '#00ACC1', sounds: ['y','x','ch','sh','th','qu'] },
+  { label: 'G7', color: '#F4511E', sounds: ['ou','oi','ue','er','ar'] },
+];
+
+// ============================================================
+// 単語データ
+// words が空（[]）の文字はグレーアウトで表示されます
 // 画像は images/words/{word}.png に格納
 // ============================================================
 const LESSONS = {
-  "A": {
-    label: "Short A",
-    words: [
-      { word: "apple",  hasTarget: true  },
-      { word: "cat",    hasTarget: true  },
-      { word: "ant",    hasTarget: true  },
-      { word: "map",    hasTarget: true  },
-      { word: "bag",    hasTarget: true  },
-      { word: "dog",    hasTarget: false },
-      { word: "fish",   hasTarget: false },
-      { word: "bed",    hasTarget: false },
-      { word: "cup",    hasTarget: false },
-      { word: "fox",    hasTarget: false },
-    ]
-  },
-  "B": {
-    label: "B Sound",
-    words: [
-      { word: "bat",    hasTarget: true  },
-      { word: "ball",   hasTarget: true  },
-      { word: "bus",    hasTarget: true  },
-      { word: "bed",    hasTarget: true  },
-      { word: "book",   hasTarget: true  },
-      { word: "cat",    hasTarget: false },
-      { word: "dog",    hasTarget: false },
-      { word: "fish",   hasTarget: false },
-      { word: "hat",    hasTarget: false },
-      { word: "sun",    hasTarget: false },
-    ]
-  },
-  "C": {
-    label: "C Sound",
-    words: [
-      { word: "cat",    hasTarget: true  },
-      { word: "cup",    hasTarget: true  },
-      { word: "car",    hasTarget: true  },
-      { word: "cake",   hasTarget: true  },
-      { word: "cow",    hasTarget: true  },
-      { word: "dog",    hasTarget: false },
-      { word: "fish",   hasTarget: false },
-      { word: "hat",    hasTarget: false },
-      { word: "sun",    hasTarget: false },
-      { word: "ball",   hasTarget: false },
-    ]
-  }
-  // 追加の文字はここに続けて追加
+  "s":  { words: [
+    { word:"sun",  hasTarget:true  }, { word:"sock", hasTarget:true  },
+    { word:"sit",  hasTarget:true  }, { word:"sand", hasTarget:true  },
+    { word:"six",  hasTarget:true  }, { word:"cat",  hasTarget:false },
+    { word:"dog",  hasTarget:false }, { word:"pin",  hasTarget:false },
+    { word:"net",  hasTarget:false }, { word:"hat",  hasTarget:false },
+  ]},
+  "a":  { words: [
+    { word:"apple",hasTarget:true  }, { word:"ant",  hasTarget:true  },
+    { word:"cat",  hasTarget:true  }, { word:"map",  hasTarget:true  },
+    { word:"bag",  hasTarget:true  }, { word:"dog",  hasTarget:false },
+    { word:"fish", hasTarget:false }, { word:"bed",  hasTarget:false },
+    { word:"cup",  hasTarget:false }, { word:"fox",  hasTarget:false },
+  ]},
+  "t":  { words: [
+    { word:"tap",  hasTarget:true  }, { word:"tin",  hasTarget:true  },
+    { word:"top",  hasTarget:true  }, { word:"tent", hasTarget:true  },
+    { word:"ten",  hasTarget:true  }, { word:"sun",  hasTarget:false },
+    { word:"map",  hasTarget:false }, { word:"pin",  hasTarget:false },
+    { word:"dog",  hasTarget:false }, { word:"cap",  hasTarget:false },
+  ]},
+  "i":  { words: [
+    { word:"ink",  hasTarget:true  }, { word:"sit",  hasTarget:true  },
+    { word:"pin",  hasTarget:true  }, { word:"big",  hasTarget:true  },
+    { word:"hip",  hasTarget:true  }, { word:"sun",  hasTarget:false },
+    { word:"map",  hasTarget:false }, { word:"top",  hasTarget:false },
+    { word:"dog",  hasTarget:false }, { word:"net",  hasTarget:false },
+  ]},
+  "p":  { words: [
+    { word:"pen",  hasTarget:true  }, { word:"pan",  hasTarget:true  },
+    { word:"pin",  hasTarget:true  }, { word:"pot",  hasTarget:true  },
+    { word:"pat",  hasTarget:true  }, { word:"sun",  hasTarget:false },
+    { word:"net",  hasTarget:false }, { word:"sit",  hasTarget:false },
+    { word:"dog",  hasTarget:false }, { word:"tin",  hasTarget:false },
+  ]},
+  "n":  { words: [
+    { word:"net",  hasTarget:true  }, { word:"nap",  hasTarget:true  },
+    { word:"nod",  hasTarget:true  }, { word:"nut",  hasTarget:true  },
+    { word:"nine", hasTarget:true  }, { word:"sit",  hasTarget:false },
+    { word:"top",  hasTarget:false }, { word:"pen",  hasTarget:false },
+    { word:"map",  hasTarget:false }, { word:"big",  hasTarget:false },
+  ]},
+  "ck": { words: [
+    { word:"duck", hasTarget:true  }, { word:"sock", hasTarget:true  },
+    { word:"kick", hasTarget:true  }, { word:"back", hasTarget:true  },
+    { word:"neck", hasTarget:true  }, { word:"sun",  hasTarget:false },
+    { word:"pin",  hasTarget:false }, { word:"map",  hasTarget:false },
+    { word:"dog",  hasTarget:false }, { word:"net",  hasTarget:false },
+  ]},
+  "e":  { words: [
+    { word:"egg",  hasTarget:true  }, { word:"bed",  hasTarget:true  },
+    { word:"hen",  hasTarget:true  }, { word:"net",  hasTarget:true  },
+    { word:"ten",  hasTarget:true  }, { word:"sun",  hasTarget:false },
+    { word:"pin",  hasTarget:false }, { word:"top",  hasTarget:false },
+    { word:"cat",  hasTarget:false }, { word:"run",  hasTarget:false },
+  ]},
+  "h":  { words: [
+    { word:"hat",  hasTarget:true  }, { word:"hen",  hasTarget:true  },
+    { word:"hip",  hasTarget:true  }, { word:"hot",  hasTarget:true  },
+    { word:"hug",  hasTarget:true  }, { word:"cat",  hasTarget:false },
+    { word:"sun",  hasTarget:false }, { word:"pen",  hasTarget:false },
+    { word:"top",  hasTarget:false }, { word:"net",  hasTarget:false },
+  ]},
+  "r":  { words: [
+    { word:"run",  hasTarget:true  }, { word:"rat",  hasTarget:true  },
+    { word:"red",  hasTarget:true  }, { word:"rug",  hasTarget:true  },
+    { word:"rip",  hasTarget:true  }, { word:"sun",  hasTarget:false },
+    { word:"hat",  hasTarget:false }, { word:"pen",  hasTarget:false },
+    { word:"top",  hasTarget:false }, { word:"big",  hasTarget:false },
+  ]},
+  "m":  { words: [
+    { word:"map",  hasTarget:true  }, { word:"mat",  hasTarget:true  },
+    { word:"mud",  hasTarget:true  }, { word:"mop",  hasTarget:true  },
+    { word:"men",  hasTarget:true  }, { word:"sun",  hasTarget:false },
+    { word:"hat",  hasTarget:false }, { word:"pin",  hasTarget:false },
+    { word:"top",  hasTarget:false }, { word:"red",  hasTarget:false },
+  ]},
+  "d":  { words: [
+    { word:"dog",  hasTarget:true  }, { word:"dot",  hasTarget:true  },
+    { word:"dig",  hasTarget:true  }, { word:"den",  hasTarget:true  },
+    { word:"dip",  hasTarget:true  }, { word:"sun",  hasTarget:false },
+    { word:"hat",  hasTarget:false }, { word:"pin",  hasTarget:false },
+    { word:"run",  hasTarget:false }, { word:"mat",  hasTarget:false },
+  ]},
+  "g":  { words: [
+    { word:"gas",  hasTarget:true  }, { word:"gap",  hasTarget:true  },
+    { word:"gum",  hasTarget:true  }, { word:"got",  hasTarget:true  },
+    { word:"get",  hasTarget:true  }, { word:"sun",  hasTarget:false },
+    { word:"hat",  hasTarget:false }, { word:"pin",  hasTarget:false },
+    { word:"run",  hasTarget:false }, { word:"mat",  hasTarget:false },
+  ]},
+  "o":  { words: [
+    { word:"ox",   hasTarget:true  }, { word:"top",  hasTarget:true  },
+    { word:"dog",  hasTarget:true  }, { word:"hot",  hasTarget:true  },
+    { word:"mop",  hasTarget:true  }, { word:"sun",  hasTarget:false },
+    { word:"pin",  hasTarget:false }, { word:"hat",  hasTarget:false },
+    { word:"run",  hasTarget:false }, { word:"red",  hasTarget:false },
+  ]},
+  "u":  { words: [
+    { word:"up",   hasTarget:true  }, { word:"sun",  hasTarget:true  },
+    { word:"bug",  hasTarget:true  }, { word:"cup",  hasTarget:true  },
+    { word:"mud",  hasTarget:true  }, { word:"top",  hasTarget:false },
+    { word:"pin",  hasTarget:false }, { word:"hat",  hasTarget:false },
+    { word:"dog",  hasTarget:false }, { word:"red",  hasTarget:false },
+  ]},
+  "l":  { words: [
+    { word:"leg",  hasTarget:true  }, { word:"lap",  hasTarget:true  },
+    { word:"lid",  hasTarget:true  }, { word:"log",  hasTarget:true  },
+    { word:"lip",  hasTarget:true  }, { word:"sun",  hasTarget:false },
+    { word:"hat",  hasTarget:false }, { word:"pin",  hasTarget:false },
+    { word:"run",  hasTarget:false }, { word:"top",  hasTarget:false },
+  ]},
+  "f":  { words: [
+    { word:"fan",  hasTarget:true  }, { word:"fin",  hasTarget:true  },
+    { word:"fig",  hasTarget:true  }, { word:"fog",  hasTarget:true  },
+    { word:"fun",  hasTarget:true  }, { word:"sun",  hasTarget:false },
+    { word:"hat",  hasTarget:false }, { word:"pin",  hasTarget:false },
+    { word:"run",  hasTarget:false }, { word:"leg",  hasTarget:false },
+  ]},
+  "b":  { words: [
+    { word:"bat",  hasTarget:true  }, { word:"bed",  hasTarget:true  },
+    { word:"big",  hasTarget:true  }, { word:"bus",  hasTarget:true  },
+    { word:"bug",  hasTarget:true  }, { word:"sun",  hasTarget:false },
+    { word:"hat",  hasTarget:false }, { word:"pin",  hasTarget:false },
+    { word:"run",  hasTarget:false }, { word:"top",  hasTarget:false },
+  ]},
+  // G4〜G7：単語データは後日追加
+  "ai": { words:[] }, "j": { words:[] }, "oa": { words:[] },
+  "ie": { words:[] }, "ee": { words:[] }, "or": { words:[] },
+  "z":  { words:[] }, "w":  { words:[] }, "ng": { words:[] },
+  "v":  { words:[] }, "oo": { words:[] },
+  "y":  { words:[] }, "x":  { words:[] }, "ch": { words:[] },
+  "sh": { words:[] }, "th": { words:[] }, "qu": { words:[] },
+  "ou": { words:[] }, "oi": { words:[] }, "ue": { words:[] },
+  "er": { words:[] }, "ar": { words:[] },
 };
-</script>
-<script>
+
+// 絵文字フォールバック
+const WORD_EMOJI = {
+  sun:"☀️",sock:"🧦",sit:"💺",sand:"🏖️",six:"6️⃣",
+  cat:"🐱",dog:"🐶",pin:"📌",net:"🥅",hat:"🎩",
+  apple:"🍎",ant:"🐜",map:"🗺️",bag:"👜",fish:"🐟",
+  bed:"🛏️",cup:"☕",fox:"🦊",tap:"🚰",tin:"🥫",
+  top:"🪀",tent:"⛺",ten:"🔟",ink:"🖊️",big:"🔵",
+  pen:"🖊️",pan:"🍳",pot:"🪴",egg:"🥚",hen:"🐔",
+  duck:"🦆",red:"🔴",run:"🏃",rat:"🐭",rug:"🧺",
+  mop:"🧹",dot:"⚫",leg:"🦵",fan:"🌀",bat:"🦇",
+  bus:"🚌",bug:"🐛",log:"🪵",ox:"🐂",up:"⬆️",
+  mud:"🟤",hip:"🦴",hug:"🤗",rip:"✂️",gap:"🕳️",
+  gum:"🍬",got:"✅",get:"🏃",nap:"😴",nod:"👍",
+  nut:"🥜",nine:"9️⃣",kick:"🦶",back:"🔙",neck:"🦒",
+  men:"👨",den:"🏠",dip:"🫙",gas:"⛽",fog:"🌫️",
+  fin:"🐠",fig:"🌿",fun:"🎉",lid:"🫙",lip:"👄",
+  hot:"🔥",mat:"🟫"
+};
+
 // ============================================================
-// CONFIG
-// ============================================================
-const GAME_DURATION = 30; // seconds
+const GAME_DURATION = 30;
 const IMAGE_DIR = "images/words/";
 const IMAGE_EXT = ".png";
 
-// Fallback emoji when image not found
-const WORD_EMOJI = {
-  apple:"🍎", ant:"🐜", cat:"🐱", dog:"🐶", fish:"🐟",
-  bed:"🛏️", cup:"☕", fox:"🦊", bat:"🦇", ball:"⚽",
-  bus:"🚌", book:"📚", car:"🚗", cake:"🎂", cow:"🐄",
-  sun:"☀️", hat:"🎩", map:"🗺️", bag:"👜"
-};
-
-// ============================================================
-// STATE
-// ============================================================
 let state = {
   selectedLetter: null,
+  selectedColor: '#FF6F00',
   currentWords: [],
   wordIndex: 0,
-  score: 0,
-  total: 0,
-  timer: null,
-  timeLeft: GAME_DURATION,
-  currentWord: null,
-  answering: true,
+  score: 0, total: 0,
+  timer: null, timeLeft: GAME_DURATION,
+  currentWord: null, answering: true,
 };
 
 // ============================================================
 // INIT
 // ============================================================
 function init() {
-  const grid = document.getElementById('letter-grid');
-  grid.innerHTML = '';
-  Object.keys(LESSONS).forEach(letter => {
-    const btn = document.createElement('button');
-    btn.className = 'letter-btn';
-    btn.textContent = letter;
-    btn.onclick = () => selectLetter(letter, btn);
-    grid.appendChild(btn);
+  const wrap = document.getElementById('groups-wrap');
+  wrap.innerHTML = '';
+
+  JP_GROUPS.forEach(group => {
+    const row = document.createElement('div');
+    row.className = 'group-row';
+
+    const badge = document.createElement('div');
+    badge.className = 'group-badge';
+    badge.style.background = group.color;
+    badge.style.borderColor = darken(group.color);
+    badge.textContent = group.label;
+    row.appendChild(badge);
+
+    const lettersWrap = document.createElement('div');
+    lettersWrap.className = 'group-letters';
+
+    group.sounds.forEach(sound => {
+      const btn = document.createElement('button');
+      const isDigraph = sound.length > 1;
+      btn.className = 'letter-btn' + (isDigraph ? ' digraph' : '');
+      btn.textContent = sound;
+      btn.style.setProperty('--gcolor', group.color);
+
+      const hasData = LESSONS[sound] && LESSONS[sound].words.length > 0;
+      if (!hasData) {
+        btn.classList.add('no-data');
+      } else {
+        btn.addEventListener('click', () => selectLetter(sound, btn, group.color));
+      }
+      lettersWrap.appendChild(btn);
+    });
+
+    row.appendChild(lettersWrap);
+    wrap.appendChild(row);
   });
+
   state.selectedLetter = null;
   document.getElementById('start-btn').disabled = true;
 }
 
-function selectLetter(letter, el) {
+function darken(hex) {
+  // 簡易暗色化
+  const n = parseInt(hex.slice(1), 16);
+  const r = Math.max(0, (n >> 16) - 40);
+  const g = Math.max(0, ((n >> 8) & 0xff) - 40);
+  const b = Math.max(0, (n & 0xff) - 40);
+  return `rgb(${r},${g},${b})`;
+}
+
+function selectLetter(letter, el, color) {
   document.querySelectorAll('.letter-btn').forEach(b => b.classList.remove('selected'));
   el.classList.add('selected');
   state.selectedLetter = letter;
+  state.selectedColor = color;
   document.getElementById('start-btn').disabled = false;
 }
 
@@ -689,20 +668,20 @@ document.getElementById('start-btn').addEventListener('click', startGame);
 
 function startGame() {
   if (!state.selectedLetter) return;
-
   const lesson = LESSONS[state.selectedLetter];
-  // Shuffle words
   state.currentWords = shuffle([...lesson.words]);
   state.wordIndex = 0;
-  state.score = 0;
-  state.total = 0;
+  state.score = 0; state.total = 0;
   state.timeLeft = GAME_DURATION;
 
-  document.getElementById('target-letter').textContent = state.selectedLetter;
+  const tl = document.getElementById('target-letter');
+  tl.textContent = state.selectedLetter;
+  tl.className = 'target-letter' + (state.selectedLetter.length > 1 ? ' digraph' : '');
+  tl.style.background = state.selectedColor;
+
   document.getElementById('score-num').textContent = '0';
   document.getElementById('q-num').textContent = '0';
   updateTimerBar();
-
   showScreen('game-screen');
   nextWord();
   startTimer();
@@ -721,14 +700,11 @@ function shuffle(arr) {
 // ============================================================
 function nextWord() {
   if (state.wordIndex >= state.currentWords.length) {
-    // Re-shuffle and continue
     state.currentWords = shuffle([...LESSONS[state.selectedLetter].words]);
     state.wordIndex = 0;
   }
-
   state.currentWord = state.currentWords[state.wordIndex++];
   state.answering = true;
-
   setButtons(true);
   displayWord(state.currentWord.word);
   speakWord();
@@ -736,18 +712,13 @@ function nextWord() {
 
 function displayWord(word) {
   document.getElementById('word-text').textContent = word;
-
   const wrap = document.getElementById('word-image-wrap');
-  const placeholder = document.getElementById('word-placeholder');
   const imgPath = IMAGE_DIR + word + IMAGE_EXT;
-
-  // Try loading image
   const img = new Image();
   img.onload = () => {
     wrap.innerHTML = '';
     const el = document.createElement('img');
-    el.src = imgPath;
-    el.alt = word;
+    el.src = imgPath; el.alt = word;
     wrap.appendChild(el);
   };
   img.onerror = () => {
@@ -758,31 +729,24 @@ function displayWord(word) {
     wrap.appendChild(pl);
   };
   img.src = imgPath;
-
-  // Re-trigger card animation
   const card = document.getElementById('word-card');
-  card.style.animation = 'none';
-  card.offsetHeight; // reflow
-  card.style.animation = '';
+  card.style.animation = 'none'; card.offsetHeight; card.style.animation = '';
 }
 
 // ============================================================
-// AUDIO (Google TTS)
+// AUDIO
 // ============================================================
 let currentAudio = null;
 function speakWord() {
   if (!state.currentWord) return;
   const word = state.currentWord.word;
   if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-  // Use Google Translate TTS
   const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(word)}&tl=en-us&client=tw-ob`;
   const audio = new Audio(url);
   audio.play().catch(() => {
-    // Fallback: Web Speech API
-    const utter = new SpeechSynthesisUtterance(word);
-    utter.lang = 'en-US';
-    utter.rate = 0.85;
-    speechSynthesis.speak(utter);
+    const u = new SpeechSynthesisUtterance(word);
+    u.lang = 'en-US'; u.rate = 0.85;
+    speechSynthesis.speak(u);
   });
   currentAudio = audio;
 }
@@ -794,43 +758,31 @@ function answer(userSaysYes) {
   if (!state.answering) return;
   state.answering = false;
   setButtons(false);
-
   const correct = (userSaysYes === state.currentWord.hasTarget);
   state.total++;
   document.getElementById('q-num').textContent = state.total;
-
   if (correct) {
     state.score++;
     document.getElementById('score-num').textContent = state.score;
-    showFeedback('✅', true);
+    showFeedback('✅');
   } else {
-    showFeedback('❌', false);
+    showFeedback('❌');
   }
-
-  setTimeout(() => {
-    hideFeedback();
-    nextWord();
-  }, 700);
+  setTimeout(() => { hideFeedback(); nextWord(); }, 700);
 }
 
-function setButtons(enabled) {
-  document.getElementById('btn-yes').disabled = !enabled;
-  document.getElementById('btn-no').disabled = !enabled;
+function setButtons(en) {
+  document.getElementById('btn-yes').disabled = !en;
+  document.getElementById('btn-no').disabled = !en;
 }
 
-// ============================================================
-// FEEDBACK
-// ============================================================
-function showFeedback(emoji, ok) {
-  const overlay = document.getElementById('feedback-overlay');
-  const blob = document.getElementById('feedback-blob');
-  blob.textContent = emoji;
-  blob.style.animation = 'none';
-  blob.offsetHeight;
-  blob.style.animation = '';
-  overlay.classList.add('show');
+function showFeedback(emoji) {
+  const ov = document.getElementById('feedback-overlay');
+  const bl = document.getElementById('feedback-blob');
+  bl.textContent = emoji;
+  bl.style.animation = 'none'; bl.offsetHeight; bl.style.animation = '';
+  ov.classList.add('show');
 }
-
 function hideFeedback() {
   document.getElementById('feedback-overlay').classList.remove('show');
 }
@@ -849,12 +801,9 @@ function startTimer() {
       updateTimerDisplay();
       clearInterval(state.timer);
       endGame();
-    } else {
-      updateTimerDisplay();
-    }
+    } else { updateTimerDisplay(); }
   }, 100);
 }
-
 function updateTimerDisplay() {
   const n = Math.ceil(state.timeLeft);
   const el = document.getElementById('timer-num');
@@ -862,10 +811,8 @@ function updateTimerDisplay() {
   el.classList.toggle('warning', n <= 5);
   updateTimerBar();
 }
-
 function updateTimerBar() {
-  const pct = (state.timeLeft / GAME_DURATION) * 100;
-  document.getElementById('timer-bar').style.width = Math.max(0, pct) + '%';
+  document.getElementById('timer-bar').style.width = Math.max(0,(state.timeLeft/GAME_DURATION)*100)+'%';
 }
 
 // ============================================================
@@ -874,33 +821,15 @@ function updateTimerBar() {
 function endGame() {
   if (currentAudio) { currentAudio.pause(); currentAudio = null; }
   setButtons(false);
-
   const ratio = state.total > 0 ? state.score / state.total : 0;
-  let stars = '⭐';
-  let title = 'おわり！';
-  let message = 'もう一回やってみよう！';
-
-  if (ratio >= 0.9) {
-    stars = '⭐⭐⭐';
-    title = '🎉 すごい！！';
-    message = 'パーフェクトに近い！！';
-    launchConfetti();
-  } else if (ratio >= 0.7) {
-    stars = '⭐⭐';
-    title = '😄 よくできました！';
-    message = 'どんどん上手になってるよ！';
-  } else {
-    stars = '⭐';
-    title = '😊 がんばれ！';
-    message = 'もう一回チャレンジしよう！';
-  }
-
+  let stars='⭐', title='おわり！', msg='もう一回やってみよう！';
+  if (ratio >= 0.9)      { stars='⭐⭐⭐'; title='🎉 すごい！！'; msg='パーフェクトに近い！！'; launchConfetti(); }
+  else if (ratio >= 0.7) { stars='⭐⭐';   title='😄 よくできました！'; msg='どんどん上手になってるよ！'; }
   document.getElementById('result-title').textContent = title;
   document.getElementById('result-score').textContent = state.score;
   document.getElementById('result-sub').textContent = `もんだい ${state.total} もん`;
   document.getElementById('result-stars').textContent = stars;
-  document.getElementById('result-message').textContent = message;
-
+  document.getElementById('result-message').textContent = msg;
   showScreen('result-screen');
 }
 
@@ -908,44 +837,37 @@ function endGame() {
 // CONFETTI
 // ============================================================
 function launchConfetti() {
-  const container = document.getElementById('confetti-container');
-  container.innerHTML = '';
-  const colors = ['#FF6F00','#FFD600','#00C853','#2979FF','#FF1744','#AA00FF'];
+  const c = document.getElementById('confetti-container');
+  c.innerHTML = '';
+  const cols = ['#E53935','#FFD600','#00C853','#1E88E5','#FF1744','#8E24AA'];
   for (let i = 0; i < 60; i++) {
-    const piece = document.createElement('div');
-    piece.className = 'confetti-piece';
-    piece.style.left = Math.random() * 100 + 'vw';
-    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
-    piece.style.width = (8 + Math.random() * 12) + 'px';
-    piece.style.height = (8 + Math.random() * 12) + 'px';
-    piece.style.animationDuration = (1.5 + Math.random() * 2) + 's';
-    piece.style.animationDelay = (Math.random() * 0.8) + 's';
-    container.appendChild(piece);
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = Math.random()*100+'vw';
+    p.style.background = cols[Math.floor(Math.random()*cols.length)];
+    p.style.width = (8+Math.random()*12)+'px';
+    p.style.height = (8+Math.random()*12)+'px';
+    p.style.animationDuration = (1.5+Math.random()*2)+'s';
+    p.style.animationDelay = (Math.random()*0.8)+'s';
+    c.appendChild(p);
   }
-  setTimeout(() => container.innerHTML = '', 4000);
+  setTimeout(() => c.innerHTML='', 4000);
 }
 
 // ============================================================
-// NAVIGATION
+// NAV
 // ============================================================
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
-
-function replay() {
-  startGame();
-}
-
+function replay() { startGame(); }
 function goHome() {
   if (state.timer) clearInterval(state.timer);
   showScreen('start-screen');
   init();
 }
 
-// ============================================================
-// BOOT
-// ============================================================
 init();
 </script>
 </body>
