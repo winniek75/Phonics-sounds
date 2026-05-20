@@ -335,6 +335,39 @@
     border: 1px solid var(--outline);
   }
 
+  /* ========== COMBO OVERLAY ========== */
+  .combo-overlay {
+    position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+    z-index: 150; pointer-events: none;
+    font-family: 'Fredoka One', cursive; font-size: 48px;
+    color: #fff; text-shadow: 4px 4px 0 var(--outline), 0 0 20px rgba(255,215,0,0.6);
+    animation: combo-pop 1.5s ease-out forwards;
+  }
+  @keyframes combo-pop {
+    0%   { transform: scale(0); opacity: 0; }
+    15%  { transform: scale(1.1); opacity: 1; }
+    25%  { transform: scale(1); }
+    80%  { opacity: 1; }
+    100% { opacity: 0; transform: scale(1.05) translateY(-30px); }
+  }
+
+  /* ========== NEAR-MISS / PERFECT ========== */
+  .near-miss-msg {
+    font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 17px;
+    padding: 10px 20px; border-radius: 14px; text-align: center; margin-top: 6px;
+  }
+  .near-miss-msg.near { background: #FFF3E0; color: #E65100; border: 2px solid #FFB74D; }
+  .near-miss-msg.perfect {
+    background: linear-gradient(135deg, #FFD700, #FFA000); color: #fff;
+    font-size: 22px; text-shadow: 0 0 10px rgba(255,215,0,0.8);
+    box-shadow: 0 0 20px rgba(255,215,0,0.4);
+    animation: perfect-glow 1.5s ease-in-out infinite;
+  }
+  @keyframes perfect-glow {
+    0%,100% { box-shadow: 0 0 20px rgba(255,215,0,0.4); }
+    50% { box-shadow: 0 0 35px rgba(255,215,0,0.7); }
+  }
+
   /* ========== FEEDBACK ========== */
   .feedback-overlay {
     position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
@@ -650,6 +683,10 @@ let state = {
   timer: null, timeLeft: GAME_DURATION,
   currentWord: null, answering: true,
   wrongAnswers: [],
+  combo: 0,
+  maxCombo: 0,
+  recentAnswers: [], // last 5 answers for adaptive difficulty (true/false)
+  adaptiveSpeed: 1.0, // multiplier for timer speed (lower=slower)
 };
 
 // ============================================================
@@ -818,6 +855,10 @@ function startGame() {
   state.score = 0; state.total = 0;
   state.timeLeft = GAME_DURATION;
   state.wrongAnswers = [];
+  state.combo = 0;
+  state.maxCombo = 0;
+  state.recentAnswers = [];
+  state.adaptiveSpeed = 1.0;
 
   const tl = document.getElementById('target-letter');
   tl.textContent = state.selectedLetter;
@@ -906,12 +947,24 @@ function answer(userSaysYes) {
   const correct = (userSaysYes === state.currentWord.hasTarget);
   state.total++;
   document.getElementById('q-num').textContent = state.total;
+
+  // Track for adaptive difficulty
+  state.recentAnswers.push(correct);
+  if (state.recentAnswers.length > 5) state.recentAnswers.shift();
+  updateAdaptiveSpeed();
+
   if (correct) {
     state.score++;
+    state.combo++;
+    if (state.combo > state.maxCombo) state.maxCombo = state.combo;
     document.getElementById('score-num').textContent = state.score;
     showFeedback('✅');
     playCorrectSound();
+    // Combo milestones
+    const milestones = { 3: 'NICE! 🔥', 5: 'GREAT! ⚡', 7: 'AMAZING! 🌟', 10: 'UNSTOPPABLE! 💥' };
+    if (milestones[state.combo]) showComboOverlay(milestones[state.combo]);
   } else {
+    state.combo = 0;
     showFeedback('❌');
     playWrongSound();
     state.wrongAnswers.push(state.currentWord.word);
@@ -919,6 +972,25 @@ function answer(userSaysYes) {
     if(window.WiseXP) window.WiseXP.reportWrong({question:state.currentWord.word+' (target: '+state.selectedLetter+')', correct:String(state.currentWord.hasTarget), playerAnswer:String(userSaysYes)});
   }
   setTimeout(() => { hideFeedback(); nextWord(); }, 700);
+}
+
+function showComboOverlay(text) {
+  const existing = document.querySelector('.combo-overlay');
+  if (existing) existing.remove();
+  const el = document.createElement('div');
+  el.className = 'combo-overlay';
+  el.textContent = text;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1500);
+}
+
+function updateAdaptiveSpeed() {
+  if (state.recentAnswers.length < 5) { state.adaptiveSpeed = 1.0; return; }
+  const correctCount = state.recentAnswers.filter(Boolean).length;
+  const accuracy = correctCount / state.recentAnswers.length;
+  if (accuracy < 0.4) state.adaptiveSpeed = 0.7; // slow down
+  else if (accuracy > 0.8) state.adaptiveSpeed = 1.3; // speed up
+  else state.adaptiveSpeed = 1.0;
 }
 
 function setButtons(en) {
@@ -945,7 +1017,7 @@ function startTimer() {
   state.timeLeft = GAME_DURATION;
   updateTimerDisplay();
   state.timer = setInterval(() => {
-    state.timeLeft -= 0.1;
+    state.timeLeft -= 0.1 * state.adaptiveSpeed;
     if (state.timeLeft <= 0) {
       state.timeLeft = 0;
       updateTimerDisplay();
@@ -986,6 +1058,25 @@ function endGame() {
   document.getElementById('result-sub').textContent = `もんだい ${state.total} もん`;
   document.getElementById('result-stars').textContent = stars;
   document.getElementById('result-message').textContent = msg;
+
+  // Near-miss / Perfect feedback
+  const nearMissEl = document.getElementById('near-miss-feedback');
+  if (nearMissEl) nearMissEl.remove();
+  const pctScore = state.total > 0 ? Math.round((state.score / state.total) * 100) : 0;
+  if (pctScore === 100 && state.total > 0) {
+    const el = document.createElement('div');
+    el.id = 'near-miss-feedback';
+    el.className = 'near-miss-msg perfect';
+    el.textContent = 'PERFECT! 💎';
+    document.getElementById('result-message').after(el);
+  } else if (pctScore >= 80 && pctScore < 100) {
+    const remaining = state.total - state.score;
+    const el = document.createElement('div');
+    el.id = 'near-miss-feedback';
+    el.className = 'near-miss-msg near';
+    el.textContent = `あと${remaining}問でパーフェクト！もう一回？`;
+    document.getElementById('result-message').after(el);
+  }
 
   // Show best score
   const prog = getLetterProgress(state.selectedLetter);
