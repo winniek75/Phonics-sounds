@@ -302,6 +302,39 @@
     border: 3px solid rgba(255,255,255,0.5); border-radius: 50px; padding: 10px 24px; cursor: pointer;
   }
 
+  /* ========== WRONG ANSWERS REVIEW ========== */
+  .wrong-list {
+    width: 100%; max-width: 340px; margin-top: 6px;
+  }
+  .wrong-list-title {
+    font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 14px;
+    color: var(--card); text-shadow: 1px 1px 0 var(--outline);
+    text-align: center; margin-bottom: 8px;
+  }
+  .wrong-item {
+    background: var(--card); border: 3px solid var(--outline);
+    border-radius: 14px; padding: 10px 16px; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 3px 3px 0 var(--outline);
+    font-family: 'Nunito', sans-serif; font-weight: 700;
+  }
+  .wrong-item-emoji { font-size: 32px; }
+  .wrong-item-word { font-size: 20px; color: var(--text); font-family: 'Fredoka One', cursive; }
+  .wrong-item-info { font-size: 13px; color: #888; }
+
+  /* ========== BEST SCORE BADGE ========== */
+  .best-score-badge {
+    font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 13px;
+    color: #FFD600; letter-spacing: 1px; margin-top: 2px;
+  }
+
+  /* ========== LETTER BUTTON PROGRESS DOT ========== */
+  .letter-btn .progress-dot {
+    position: absolute; bottom: 3px; right: 3px;
+    width: 8px; height: 8px; border-radius: 50%;
+    border: 1px solid var(--outline);
+  }
+
   /* ========== FEEDBACK ========== */
   .feedback-overlay {
     position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
@@ -415,6 +448,8 @@
     <div class="result-stars" id="result-stars">⭐⭐⭐</div>
   </div>
   <div class="result-message" id="result-message">すごい！</div>
+  <div class="best-score-badge" id="best-score-badge"></div>
+  <div class="wrong-list" id="wrong-list"></div>
   <button class="replay-btn" onclick="replay()">もういちど！🔄</button>
   <button class="back-btn" onclick="goHome()">もじをかえる</button>
 </div>
@@ -604,6 +639,7 @@ const WORD_EMOJI = {
 const GAME_DURATION = 30;
 const IMAGE_DIR = "images/words/";
 const IMAGE_EXT = ".png";
+const STORAGE_KEY = 'phonics-game-progress';
 
 let state = {
   selectedLetter: null,
@@ -613,7 +649,90 @@ let state = {
   score: 0, total: 0,
   timer: null, timeLeft: GAME_DURATION,
   currentWord: null, answering: true,
+  wrongAnswers: [],
 };
+
+// ============================================================
+// SOUND EFFECTS (Web Audio API)
+// ============================================================
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playCorrectSound() {
+  try {
+    const ctx = getAudioCtx();
+    const freqs = [523.25, 659.25, 783.99]; // C-E-G chime
+    freqs.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.2, ctx.currentTime + i * 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.08 + 0.3);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + i * 0.08);
+      osc.stop(ctx.currentTime + i * 0.08 + 0.3);
+    });
+  } catch(e) {}
+}
+
+function playWrongSound() {
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(150, ctx.currentTime);
+    osc.frequency.linearRampToValueAtTime(100, ctx.currentTime + 0.2);
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.2);
+  } catch(e) {}
+}
+
+// ============================================================
+// LOCALSTORAGE PERSISTENCE
+// ============================================================
+function loadProgress() {
+  try {
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : {};
+  } catch(e) { return {}; }
+}
+
+function saveProgress(letter, score, total, wrongWords) {
+  try {
+    const progress = loadProgress();
+    if (!progress[letter]) {
+      progress[letter] = { bestScore: 0, bestTotal: 0, gamesPlayed: 0, wrongHistory: {} };
+    }
+    const p = progress[letter];
+    p.gamesPlayed++;
+    if (total > 0 && (score / total) > (p.bestTotal > 0 ? p.bestScore / p.bestTotal : 0)) {
+      p.bestScore = score;
+      p.bestTotal = total;
+    }
+    // Track cumulative wrong answers
+    wrongWords.forEach(w => {
+      if (!p.wrongHistory[w]) p.wrongHistory[w] = 0;
+      p.wrongHistory[w]++;
+    });
+    p.lastPlayed = new Date().toISOString();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+  } catch(e) {}
+}
+
+function getLetterProgress(letter) {
+  const progress = loadProgress();
+  return progress[letter] || null;
+}
 
 // ============================================================
 // INIT
@@ -648,6 +767,15 @@ function init() {
         btn.classList.add('no-data');
       } else {
         btn.addEventListener('click', () => selectLetter(sound, btn, group.color));
+        // Show progress dot if played before
+        const prog = getLetterProgress(sound);
+        if (prog && prog.gamesPlayed > 0) {
+          const dot = document.createElement('span');
+          dot.className = 'progress-dot';
+          const ratio = prog.bestTotal > 0 ? prog.bestScore / prog.bestTotal : 0;
+          dot.style.background = ratio >= 0.9 ? '#FFD600' : ratio >= 0.7 ? '#00C853' : '#29B6F6';
+          btn.appendChild(dot);
+        }
       }
       lettersWrap.appendChild(btn);
     });
@@ -689,6 +817,7 @@ function startGame() {
   state.wordIndex = 0;
   state.score = 0; state.total = 0;
   state.timeLeft = GAME_DURATION;
+  state.wrongAnswers = [];
 
   const tl = document.getElementById('target-letter');
   tl.textContent = state.selectedLetter;
@@ -781,8 +910,11 @@ function answer(userSaysYes) {
     state.score++;
     document.getElementById('score-num').textContent = state.score;
     showFeedback('✅');
+    playCorrectSound();
   } else {
     showFeedback('❌');
+    playWrongSound();
+    state.wrongAnswers.push(state.currentWord.word);
   }
   setTimeout(() => { hideFeedback(); nextWord(); }, 700);
 }
@@ -841,11 +973,57 @@ function endGame() {
   let stars='⭐', title='おわり！', msg='もう一回やってみよう！';
   if (ratio >= 0.9)      { stars='⭐⭐⭐'; title='🎉 すごい！！'; msg='パーフェクトに近い！！'; launchConfetti(); }
   else if (ratio >= 0.7) { stars='⭐⭐';   title='😄 よくできました！'; msg='どんどん上手になってるよ！'; }
+  // Save progress to localStorage
+  saveProgress(state.selectedLetter, state.score, state.total, state.wrongAnswers);
+
   document.getElementById('result-title').textContent = title;
   document.getElementById('result-score').textContent = state.score;
   document.getElementById('result-sub').textContent = `もんだい ${state.total} もん`;
   document.getElementById('result-stars').textContent = stars;
   document.getElementById('result-message').textContent = msg;
+
+  // Show best score
+  const prog = getLetterProgress(state.selectedLetter);
+  const bestBadge = document.getElementById('best-score-badge');
+  if (prog && prog.bestTotal > 0) {
+    bestBadge.textContent = `BEST: ${prog.bestScore}/${prog.bestTotal} (${prog.gamesPlayed}かいプレイ)`;
+  } else {
+    bestBadge.textContent = '';
+  }
+
+  // Show wrong answers review
+  const wrongList = document.getElementById('wrong-list');
+  wrongList.innerHTML = '';
+  if (state.wrongAnswers.length > 0) {
+    const titleEl = document.createElement('div');
+    titleEl.className = 'wrong-list-title';
+    titleEl.textContent = `まちがえた ことば (${state.wrongAnswers.length})`;
+    wrongList.appendChild(titleEl);
+
+    // Deduplicate
+    const unique = [...new Set(state.wrongAnswers)];
+    unique.forEach(word => {
+      const item = document.createElement('div');
+      item.className = 'wrong-item';
+      const emoji = document.createElement('span');
+      emoji.className = 'wrong-item-emoji';
+      emoji.textContent = WORD_EMOJI[word] || '🔤';
+      const wordEl = document.createElement('span');
+      wordEl.className = 'wrong-item-word';
+      wordEl.textContent = word;
+      const info = document.createElement('span');
+      info.className = 'wrong-item-info';
+      const wordData = LESSONS[state.selectedLetter].words.find(w => w.word === word);
+      info.textContent = wordData && wordData.hasTarget
+        ? `→ "${state.selectedLetter}" のおとが ある`
+        : `→ "${state.selectedLetter}" のおとが ない`;
+      item.appendChild(emoji);
+      item.appendChild(wordEl);
+      item.appendChild(info);
+      wrongList.appendChild(item);
+    });
+  }
+
   showScreen('result-screen');
 }
 
