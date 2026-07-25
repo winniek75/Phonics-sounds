@@ -1033,7 +1033,13 @@ function answer(userSaysYes) {
     state.combo = 0;
     showFeedback('❌');
     playWrongSound();
-    state.wrongAnswers.push(state.currentWord.word);
+    state.wrongAnswers.push({
+      q: state.currentWord.word + ' → ' + state.selectedLetter + ' の音がある？',
+      correct: state.currentWord.hasTarget ? 'Yes' : 'No',
+      chosen: userSaysYes ? 'Yes' : 'No',
+      tag: 'digraph',
+      word: state.currentWord.word
+    });
     // WiseXP: report wrong answer
     if(window.WiseXP) window.WiseXP.reportWrong({question:state.currentWord.word+' (target: '+state.selectedLetter+')', correct:String(state.currentWord.hasTarget), playerAnswer:String(userSaysYes)});
   }
@@ -1126,7 +1132,7 @@ function endGame() {
       score: pct, maxScore: 100, accuracy: pct,
       timeSpent: Math.round((Date.now() - (window.__wiseStartTime || Date.now())) / 1000),
       metadata: { letter: state.selectedLetter, correct: state.score,
-                  total: state.total, wrongAnswers: (state.wrongAnswers || []).slice(-20) }
+                  total: state.total, wrongAnswers: (state.wrongAnswers || []).slice(-20).map(w => typeof w === 'string' ? {q:w,correct:'',chosen:'',tag:'digraph'} : w) }
     });
   } catch(e) {}
 
