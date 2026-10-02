@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Phonics Game!</title>
+<title>フォニックスサウンド | Phonics Sounds</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -18,9 +18,11 @@
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  html { background: #FFAB40; }
   body {
     font-family: 'Fredoka One', cursive;
     background: linear-gradient(160deg, #FFE57F 0%, #FFAB40 50%, #FF7043 100%);
+    background-attachment: fixed;
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -147,9 +149,56 @@
     font-weight: 900;
     line-height: 1;
   }
+  @media (max-width: 400px) {
+    .letter-btn, .letter-btn.digraph { min-width: 44px; height: 46px; padding: 0 4px; }
+    .letter-btn { font-size: 22px; }
+    .letter-btn.digraph { font-size: 16px; }
+  }
   .letter-btn.no-data {
     opacity: 0.3;
     cursor: default;
+  }
+
+  .game-subtitle {
+    font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 14px;
+    color: var(--card); text-shadow: 1px 1px 0 var(--outline);
+    text-align: center; line-height: 1.5;
+  }
+  .game-subtitle b { font-size: 18px; letter-spacing: 1px; }
+  .deeplink-banner {
+    width: 100%; background: #FFF9C4; border: 3px solid var(--outline);
+    border-radius: 14px; box-shadow: 3px 3px 0 var(--outline);
+    padding: 8px 12px; text-align: center; color: var(--text);
+    font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 15px; line-height: 1.5;
+  }
+  .deeplink-banner[hidden] { display: none; }
+  .deeplink-banner small { display: block; font-size: 12px; color: #795548; }
+  .deeplink-banner .banner-start {
+    margin-top: 6px; padding: 8px 28px; font-family: 'Fredoka One', cursive; font-size: 22px;
+    color: var(--card); background: var(--primary); border: 3px solid var(--outline);
+    border-radius: 16px; cursor: pointer; box-shadow: 3px 3px 0 var(--outline);
+  }
+  .start-note {
+    width: 100%; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12px;
+    color: var(--text); background: rgba(255,255,255,0.75); border-radius: 12px;
+    padding: 8px 12px; line-height: 1.6;
+  }
+  .start-note b { font-family: 'Fredoka One', cursive; font-weight: 400; font-size: 14px; }
+  .mode-row { display: flex; gap: 8px; width: 100%; justify-content: center; flex-wrap: wrap; }
+  .mode-row[hidden] { display: none; }
+  .chip {
+    font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 14px; line-height: 1.3;
+    color: var(--text); background: var(--card);
+    border: 3px solid var(--outline); border-radius: 14px; padding: 8px 12px;
+    cursor: pointer; box-shadow: 3px 3px 0 var(--outline);
+  }
+  .chip small { display: block; font-size: 11px; color: #777; }
+  .chip.selected { background: #FFF9C4; border-color: var(--primary); transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--outline); }
+  .portal-link {
+    font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 14px;
+    color: var(--card); text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
+    text-decoration: none; border-bottom: 2px dotted rgba(255,255,255,0.8);
+    padding: 4px 2px; margin-top: 4px;
   }
 
   .start-btn {
@@ -170,7 +219,7 @@
   .start-btn:disabled { opacity: 0.4; animation: none; cursor: not-allowed; }
 
   /* ========== GAME SCREEN ========== */
-  #game-screen { gap: 14px; padding: 20px; justify-content: center; }
+  #game-screen { gap: 10px; padding: 14px 20px 24px; justify-content: flex-start; }
 
   .hud {
     width: 100%;
@@ -201,6 +250,7 @@
     font-size: 40px; color: var(--card);
     text-shadow: 3px 3px 0 var(--outline); line-height: 1;
   }
+  .timer-num.small { font-size: 26px; padding: 7px 0; }
   .timer-num.warning { color: #FF1744; animation: shake 0.25s ease infinite; }
   .timer-bar-bg {
     width: 100%; height: 12px; background: rgba(0,0,0,0.2);
@@ -212,38 +262,59 @@
     border-radius: 99px; transition: width 0.1s linear;
   }
 
-  .target-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .target-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; }
+  .phase-label {
+    font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 13px;
+    color: var(--text); background: #FFF9C4; border: 2px solid var(--outline);
+    border-radius: 50px; padding: 3px 14px;
+  }
+  .phase-label.warmup { background: #B3E5FC; }
+  .rule-text {
+    font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 19px; line-height: 1.35;
+    color: var(--card); text-shadow: 2px 2px 0 var(--outline); text-align: center;
+  }
+  .rule-text .snd { font-family: 'Fredoka One', cursive; font-weight: 400; font-size: 24px; color: #FFF59D; }
+  .sound-note {
+    font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12px; line-height: 1.5;
+    color: var(--text); background: rgba(255,255,255,0.8); border-radius: 10px; padding: 4px 10px; text-align: center;
+  }
+  .sound-note[hidden] { display: none; }
   .target-label {
     font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 12px;
     color: var(--card); text-transform: uppercase; letter-spacing: 2px;
     text-shadow: 1px 1px 0 var(--outline);
   }
   .target-letter {
-    font-size: 64px; line-height: 1;
+    font-size: 52px; line-height: 1;
     color: var(--card); text-shadow: 4px 4px 0 var(--outline);
     background: var(--primary);
     border: 4px solid var(--outline); border-radius: 20px;
-    min-width: 100px; height: 100px; padding: 0 16px;
+    min-width: 80px; height: 80px; padding: 0 16px;
     display: flex; align-items: center; justify-content: center;
     box-shadow: 5px 5px 0 var(--outline);
     animation: pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
-  .target-letter.digraph { font-size: 42px; min-width: 120px; }
+  .target-letter.digraph { font-size: 38px; min-width: 104px; }
 
   .word-card {
     background: var(--card); border: 4px solid var(--outline);
     border-radius: var(--radius); box-shadow: 6px 6px 0 var(--outline);
-    width: 100%; max-width: 340px; padding: 18px;
+    width: 100%; max-width: 340px; padding: 14px;
     display: flex; flex-direction: column; align-items: center; gap: 10px;
     animation: slide-up 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
+  .word-top { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  /* 解説の表示中は絵を小さくして「つぎへ」ボタンが画面内に収まるようにする */
+  .word-card.explaining .word-top { flex-direction: row; justify-content: center; }
+  .word-card.explaining .word-image-wrap { width: 72px; height: 72px; }
+  .word-card.explaining .word-image-placeholder { font-size: 40px; }
   .word-image-wrap {
-    width: 148px; height: 148px; border-radius: 14px; overflow: hidden;
+    width: 120px; height: 120px; border-radius: 14px; overflow: hidden;
     border: 3px solid #E0E0E0; background: #F5F5F5;
     display: flex; align-items: center; justify-content: center;
   }
   .word-image-wrap img { width: 100%; height: 100%; object-fit: cover; }
-  .word-image-placeholder { font-size: 74px; line-height: 1; }
+  .word-image-placeholder { font-size: 62px; line-height: 1; }
   .word-text { font-size: 46px; color: var(--text); letter-spacing: 3px; text-align: center; }
   .speak-btn {
     background: #29B6F6; border: 3px solid var(--outline); border-radius: 50px;
@@ -254,9 +325,30 @@
   }
   .speak-btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--outline); }
 
+  .explain {
+    width: 100%; text-align: center; color: var(--text);
+    font-family: 'Nunito', sans-serif; font-weight: 900; line-height: 1.35;
+    border-radius: 14px; padding: 8px 10px; background: #E8F5E9; border: 2px solid #66BB6A;
+  }
+  .explain[hidden] { display: none; }
+  .explain.ng { background: #FFF3E0; border-color: #FFB74D; }
+  .explain-judge { font-size: 15px; }
+  .explain-word { font-family: 'Fredoka One', cursive; font-weight: 400; font-size: 34px; letter-spacing: 2px; }
+  .explain-word b { font-weight: 400; color: var(--primary); text-decoration: underline; text-underline-offset: 5px; }
+  .explain-text { font-size: 18px; }
+  .explain-ans { font-size: 13px; color: #666; }
+  .next-btn {
+    width: 100%; max-width: 340px; height: 72px; border-radius: 18px; border: 4px solid var(--outline);
+    font-family: 'Fredoka One', cursive; font-size: 28px; color: var(--card); background: #29B6F6;
+    cursor: pointer; box-shadow: 6px 6px 0 var(--outline);
+  }
+  .next-btn[hidden], .answer-row[hidden] { display: none; }
+  .next-btn:active { transform: translate(4px,4px); box-shadow: 2px 2px 0 var(--outline); }
+  .ans-btn small { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 13px; }
+
   .answer-row { display: flex; gap: 14px; width: 100%; max-width: 340px; }
   .ans-btn {
-    flex: 1; height: 84px; border-radius: 18px; border: 4px solid var(--outline);
+    flex: 1; height: 72px; border-radius: 18px; border: 4px solid var(--outline);
     font-family: 'Fredoka One', cursive; font-size: 28px; color: var(--card);
     cursor: pointer; box-shadow: 6px 6px 0 var(--outline);
     transition: transform 0.1s, box-shadow 0.1s;
@@ -268,7 +360,7 @@
   .ans-btn:disabled { opacity: 0.5; pointer-events: none; }
 
   /* ========== RESULT SCREEN ========== */
-  #result-screen { gap: 20px; text-align: center; justify-content: center; }
+  #result-screen { gap: 16px; text-align: center; justify-content: flex-start; padding-top: 28px; }
   .result-title {
     font-size: 50px; color: var(--card);
     text-shadow: 5px 5px 0 var(--outline); line-height: 1.1;
@@ -485,9 +577,18 @@ window.WiseGame.init({ gameId: 'Phonics-sounds' });
 <!-- ===== START SCREEN ===== -->
 <div id="start-screen" class="screen active">
   <div class="game-title">🔤 Phonics!</div>
-  <div class="letter-selector-label">れんしゅうする もじを えらんでね</div>
+  <div class="game-subtitle"><b>フォニックスサウンド</b><br>えいごを きいて YES / NO で こたえよう</div>
+  <div class="deeplink-banner" id="deeplink-banner" hidden></div>
+  <div class="letter-selector-label">れんしゅうする もじを えらんでね（いくつでも OK）</div>
   <div class="groups-wrap" id="groups-wrap"></div>
+  <div class="mode-row" id="mode-row">
+    <button class="chip" data-mode="practice">🌱 れんしゅう<small>じかん なし</small></button>
+    <button class="chip" data-mode="time">⏱ タイムアタック<small>30びょう</small></button>
+  </div>
+  <div class="mode-row" id="count-row"></div>
   <button class="start-btn" id="start-btn" disabled>あそぶ！▶</button>
+  <a class="portal-link" href="https://wise-english-portal.vercel.app">🏠 がくしゅうホームに もどる</a>
+  <div class="start-note" id="start-note"></div>
 </div>
 
 <!-- ===== GAME SCREEN ===== -->
@@ -518,22 +619,33 @@ window.WiseGame.init({ gameId: 'Phonics-sounds' });
   </div>
 
   <div class="target-wrap">
-    <div class="target-label">ターゲット</div>
+    <div class="phase-label" id="phase-label"></div>
     <div class="target-letter" id="target-letter">s</div>
+    <div class="rule-text" id="rule-text"></div>
+    <div class="sound-note" id="sound-note" hidden></div>
   </div>
 
   <div class="word-card" id="word-card">
-    <div class="word-image-wrap" id="word-image-wrap">
-      <div class="word-image-placeholder">❓</div>
+    <div class="word-top">
+      <div class="word-image-wrap" id="word-image-wrap">
+        <div class="word-image-placeholder">❓</div>
+      </div>
+      <!-- 単語のつづりは回答前は見せない（音で判断するため）。回答後に解説で表示 -->
+      <button class="speak-btn" onclick="speakWord()">🔊 もういちど きく</button>
     </div>
-    <!-- <div class="word-text" id="word-text">---</div> --> <!-- 単語テキストを非表示 -->
-    <button class="speak-btn" onclick="speakWord()">🔊 もういちど</button>
+    <div class="explain" id="explain" hidden>
+      <div class="explain-judge" id="explain-judge"></div>
+      <div class="explain-word" id="explain-word"></div>
+      <div class="explain-text" id="explain-text"></div>
+      <div class="explain-ans" id="explain-ans"></div>
+    </div>
   </div>
 
-  <div class="answer-row">
+  <div class="answer-row" id="answer-row">
     <button class="ans-btn yes" id="btn-yes" onclick="answer(true)">✅ YES</button>
     <button class="ans-btn no"  id="btn-no"  onclick="answer(false)">❌ NO</button>
   </div>
+  <button class="next-btn" id="next-btn" onclick="advance()" hidden>つぎへ ▶</button>
 </div>
 
 <!-- ===== RESULT SCREEN ===== -->
@@ -549,7 +661,8 @@ window.WiseGame.init({ gameId: 'Phonics-sounds' });
   <div class="best-score-badge" id="best-score-badge"></div>
   <div class="wrong-list" id="wrong-list"></div>
   <button class="replay-btn" onclick="replay()">もういちど！🔄</button>
-  <button class="back-btn" onclick="goHome()">もじをかえる</button>
+  <button class="back-btn" onclick="goHome()">もじを かえる</button>
+  <a class="portal-link" href="https://wise-english-portal.vercel.app">🏠 がくしゅうホームに もどる</a>
 </div>
 
 <div class="feedback-overlay" id="feedback-overlay">
@@ -726,26 +839,98 @@ const WORD_EMOJI = {
   mop:"🧹",dot:"⚫",leg:"🦵",fan:"🌀",bat:"🦇",
   bus:"🚌",bug:"🐛",log:"🪵",ox:"🐂",up:"⬆️",
   mud:"🟤",hip:"🦴",hug:"🤗",rip:"✂️",gap:"🕳️",
-  gum:"🍬",got:"✅",get:"🏃",nap:"😴",nod:"👍",
+  gum:"🍬",got:"🎁",get:"🏃",nap:"😴",nod:"👍",
   nut:"🥜",nine:"9️⃣",kick:"🦶",back:"🔙",neck:"🦒",
   men:"👨",den:"🏠",dip:"🫙",gas:"⛽",fog:"🌫️",
   fin:"🐠",fig:"🌿",fun:"🎉",lid:"🫙",lip:"👄",
-  hot:"🔥",mat:"🟫"
+  hot:"🔥",mat:"🟫",cap:"🧢",pat:"🫳",dig:"⛏️"
 };
 
 // ============================================================
+// おとの ひょうじ・判定基準
+// ============================================================
+// 画面に出す音の表記（つづりと音がちがうもの）
+const SOUND_LABEL = { ck: 'k' };
+function snd(letter) { return '/' + (SOUND_LABEL[letter] || letter) + '/'; }
+
+// 1つのボタンで2種類の音をあつかう文字の説明（スタート画面・プレイ画面に表示）
+// 単語データを追加するときは、各単語に sound:'ながい /oo/' のように
+// どちらの音かを書くと、回答後の解説にその表記が使われます。
+const SOUND_NOTES = {
+  oo: 'oo は 2しゅるい：book の みじかい /oo/ と、moon の ながい /oo/。どちらも YES だよ',
+  th: 'th は 2しゅるい：this の こえを だす /th/ と、thin の いきだけの /th/。どちらも YES だよ',
+};
+
+// 判定基準：YES の単語がすべてその文字で始まるレッスンは「さいしょの おと」、
+// そうでなければ「ことばの どこかに」。判定そのものは hasTarget で行うので、
+// 表示する基準はデータから自動で決めて、表示と判定がずれないようにする。
+// （lesson.rule = 'first' | 'any' を書けば手動指定もできる）
+function lessonRule(letter) {
+  const lesson = LESSONS[letter];
+  if (lesson.rule) return lesson.rule;
+  const yes = lesson.words.filter(w => w.hasTarget);
+  return yes.every(w => w.word.startsWith(letter)) ? 'first' : 'any';
+}
+
+// 単語のさいしょの音（つづり→音。いまの単語データの範囲での簡易対応）
+function firstGrapheme(word) {
+  const two = word.slice(0, 2);
+  return ['sh','ch','th','qu'].includes(two) ? two : word.slice(0, 1);
+}
+function firstSound(word) {
+  const g = firstGrapheme(word);
+  return '/' + ({ c: 'k', qu: 'kw' }[g] || g) + '/';
+}
+
+// 回答後の解説：「sun → さいしょが /s/」
+function explainWord(it) {
+  const L = it.letter, w = it.word, s = it.sound || snd(L);
+  const idx = w.indexOf(L);
+  if (it.hasTarget) {
+    if (idx === 0) return { text: 'さいしょが ' + s, from: 0, len: L.length };
+    if (idx > 0 && idx + L.length === w.length) return { text: 'さいごが ' + s, from: idx, len: L.length };
+    if (idx > 0) return { text: 'まんなかに ' + s, from: idx, len: L.length };
+    return { text: s + ' の おとが ある', from: 0, len: 0 };
+  }
+  if (lessonRule(L) === 'first') {
+    let text = 'さいしょは ' + firstSound(w);
+    if (idx > 0) text += '（' + s + ' は さいしょじゃ ないよ）';
+    return { text: text, from: 0, len: firstGrapheme(w).length };
+  }
+  return { text: s + ' の おとは ない', from: 0, len: 0 };
+}
+
+// データ確認（開発用）：「どこかに」基準なのに NO の単語がその文字を含む場合は警告
+Object.keys(LESSONS).forEach(letter => {
+  if (!LESSONS[letter].words.length || lessonRule(letter) !== 'any') return;
+  LESSONS[letter].words.forEach(w => {
+    if (!w.hasTarget && w.word.includes(letter)) console.warn('[phonics] check data:', letter, w.word);
+  });
+});
+
+// ============================================================
 const GAME_DURATION = 30;
+const WARMUP_COUNT = 2;          // 採点しない「おためし」の問題数
+const DEFAULT_COUNT = 10;
 const IMAGE_DIR = "images/words/";
 const IMAGE_EXT = ".png";
 const STORAGE_KEY = 'phonics-game-progress';
+const PORTAL_URL = 'https://wise-english-portal.vercel.app';
 
 let state = {
-  selectedLetter: null,
-  selectedColor: '#FF6F00',
-  currentWords: [],
-  wordIndex: 0,
+  selected: [],            // [{letter, color}] えらんだ もじ（複数可・えらんだ順）
+  selectedLetter: null,    // 送信・表示用（"s" や "s,a"）
+  mode: 'practice',        // 'practice'（じかん なし・問題数固定） | 'time'（30びょう）
+  count: DEFAULT_COUNT,    // れんしゅうモードの問題数
+  warmup: true,            // おためし2問を出すか
+  phase: 'main',           // 'warmup' | 'main'
+  session: 0,              // 画面を離れたあとの遅延処理を無効にするための番号
+  queue: [], qIndex: 0,
+  warmQueue: [], warmIndex: 0,
+  perLetter: {},           // { s: {score,total,wrong:[word]} }
+  wrongItems: [],          // 結果画面の「まちがえた ことば」用
   score: 0, total: 0,
-  timer: null, timeLeft: GAME_DURATION,
+  timer: null, timeLeft: GAME_DURATION, paused: false,
   currentWord: null, answering: true,
   wrongAnswers: [],
   combo: 0,
@@ -837,6 +1022,46 @@ function getLetterProgress(letter) {
 }
 
 // ============================================================
+// URL パラメータ（ディープリンク）
+//   ?letters=s,a      れんしゅうする もじ（カンマ区切り。letter= でも可）
+//   &mode=practice    practice（じかん なし） | time（30びょう タイムアタック）
+//   &count=10         れんしゅうモードの問題数（3〜20）
+//   &warmup=0         おためし2問を出さない
+// 音声の自動再生制限があるため、指定内容をえらんだ状態でスタート画面を開き、
+// 「あそぶ！」を1回おすと始まる。
+// ============================================================
+function hasData(letter) {
+  return !!(LESSONS[letter] && LESSONS[letter].words.length > 0);
+}
+function groupColor(letter) {
+  const g = JP_GROUPS.find(g => g.sounds.includes(letter));
+  return g ? g.color : '#FF6F00';
+}
+const deepLink = { active: false, letters: [], skipped: [] };
+function applyUrlParams() {
+  let p;
+  try { p = new URLSearchParams(window.location.search); } catch (e) { return; }
+  const raw = p.get('letters') || p.get('letter') || p.get('sounds') || '';
+  raw.toLowerCase().split(/[,\s]+/).filter(Boolean).forEach(l => {
+    if (hasData(l)) {
+      if (!deepLink.letters.includes(l)) deepLink.letters.push(l);
+    } else if (LESSONS[l] && !deepLink.skipped.includes(l)) deepLink.skipped.push(l);   // じゅんびちゅうの もじ
+  });
+  const mode = (p.get('mode') || '').toLowerCase();
+  if (mode === 'practice') state.mode = 'practice';
+  else if (['time', 'timed', 'timeattack', 'time-attack'].includes(mode)) state.mode = 'time';
+  const count = parseInt(p.get('count'), 10);
+  if (!isNaN(count)) {
+    state.count = Math.min(20, Math.max(3, count));
+    if (!mode) state.mode = 'practice';
+  }
+  const warm = (p.get('warmup') || '').toLowerCase();
+  if (['0', 'false', 'off', 'no'].includes(warm)) state.warmup = false;
+  state.selected = deepLink.letters.map(l => ({ letter: l, color: groupColor(l) }));
+  deepLink.active = deepLink.letters.length > 0 || deepLink.skipped.length > 0 || !!mode || !isNaN(count);
+}
+
+// ============================================================
 // INIT
 // ============================================================
 function init() {
@@ -864,11 +1089,13 @@ function init() {
       btn.textContent = sound;
       btn.style.setProperty('--gcolor', group.color);
 
-      const hasData = LESSONS[sound] && LESSONS[sound].words.length > 0;
-      if (!hasData) {
+      if (!hasData(sound)) {
         btn.classList.add('no-data');
+        btn.title = 'じゅんびちゅう';
+        btn.setAttribute('aria-disabled', 'true');
       } else {
         btn.addEventListener('click', () => selectLetter(sound, btn, group.color));
+        if (state.selected.some(x => x.letter === sound)) btn.classList.add('selected');
         // Show progress dot if played before
         const prog = getLetterProgress(sound);
         if (prog && prog.gamesPlayed > 0) {
@@ -886,8 +1113,67 @@ function init() {
     wrap.appendChild(row);
   });
 
-  state.selectedLetter = null;
-  document.getElementById('start-btn').disabled = true;
+  renderStartNote();
+  renderModeChips();
+  renderBanner();
+  updateStartButton();
+}
+
+function renderStartNote() {
+  const el = document.getElementById('start-note');
+  el.innerHTML = '';
+  const add = (text) => { const d = document.createElement('div'); d.textContent = text; el.appendChild(d); };
+  add('・うすい いろの もじは じゅんびちゅうです。');
+  add('・こたえかた：「さいしょの おと」か「ことばの どこかに ある おと」かは、あそぶ がめんに でます。');
+  Object.keys(SOUND_NOTES).forEach(k => add('・' + SOUND_NOTES[k].replace(/。どちらも YES だよ$/, '。ボタンは 1つで、どちらの おとも YES に なります') + (hasData(k) ? '' : '（じゅんびちゅう）') + '。'));
+}
+
+function renderModeChips() {
+  document.querySelectorAll('#mode-row .chip').forEach(chip => {
+    chip.classList.toggle('selected', chip.dataset.mode === state.mode);
+    chip.onclick = () => { state.mode = chip.dataset.mode; renderModeChips(); renderBanner(); };
+  });
+  const row = document.getElementById('count-row');
+  row.innerHTML = '';
+  row.hidden = state.mode !== 'practice';
+  const counts = [5, 10];
+  if (!counts.includes(state.count)) counts.push(state.count);
+  counts.sort((a, b) => a - b).forEach(n => {
+    const chip = document.createElement('button');
+    chip.className = 'chip' + (n === state.count ? ' selected' : '');
+    chip.textContent = n + 'もん';
+    chip.onclick = () => { state.count = n; renderModeChips(); renderBanner(); };
+    row.appendChild(chip);
+  });
+}
+
+function modeText() {
+  return state.mode === 'practice' ? 'れんしゅう ' + state.count + 'もん（じかん なし）' : 'タイムアタック 30びょう';
+}
+
+function renderBanner() {
+  const el = document.getElementById('deeplink-banner');
+  if (!deepLink.active) { el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = '';
+  const add = (tag, text) => { const d = document.createElement(tag); d.textContent = text; el.appendChild(d); return d; };
+  const letters = state.selected.map(x => x.letter).join(' ・ ');
+  add('div', '📌 きょうの れんしゅう');
+  add('div', (letters ? letters + ' ／ ' : '') + modeText());
+  if (deepLink.skipped.length) add('small', '（' + deepLink.skipped.join(', ') + ' は じゅんびちゅう）');
+  if (state.selected.length) {
+    // 下までスクロールしなくても始められるように、ここにもスタートボタンを置く
+    const b = add('button', 'あそぶ！▶');
+    b.className = 'banner-start';
+    b.onclick = () => startGame();
+  } else {
+    add('small', 'もじを えらんでね');
+  }
+}
+
+function updateStartButton() {
+  state.selectedLetter = state.selected.length ? state.selected.map(x => x.letter).join(',') : null;
+  document.getElementById('start-btn').disabled = state.selected.length === 0;
 }
 
 function darken(hex) {
@@ -899,44 +1185,105 @@ function darken(hex) {
   return `rgb(${r},${g},${b})`;
 }
 
+// もじは いくつでも えらべる（もういちど おすと はずれる）
 function selectLetter(letter, el, color) {
-  document.querySelectorAll('.letter-btn').forEach(b => b.classList.remove('selected'));
-  el.classList.add('selected');
-  state.selectedLetter = letter;
-  state.selectedColor = color;
-  document.getElementById('start-btn').disabled = false;
+  const i = state.selected.findIndex(x => x.letter === letter);
+  if (i >= 0) { state.selected.splice(i, 1); el.classList.remove('selected'); }
+  else { state.selected.push({ letter: letter, color: color }); el.classList.add('selected'); }
+  updateStartButton();
+  renderBanner();
 }
 
 // ============================================================
 // GAME START
 // ============================================================
-document.getElementById('start-btn').addEventListener('click', startGame);
+document.getElementById('start-btn').addEventListener('click', () => startGame());
 
-function startGame() {
+function toItem(sel, w) {
+  return { letter: sel.letter, color: sel.color, word: w.word, hasTarget: w.hasTarget, sound: w.sound };
+}
+
+// YES / NO がほぼ半分ずつになるように n 問えらぶ（avoid の単語はなるべく後回し）
+function pickBalanced(words, n, avoid) {
+  const order = arr => {
+    const a = shuffle(arr.slice());
+    return a.filter(w => !avoid.includes(w.word)).concat(a.filter(w => avoid.includes(w.word)));
+  };
+  const pools = [order(words.filter(w => w.hasTarget)), order(words.filter(w => !w.hasTarget))];
+  const used = [0, 0];
+  const out = [];
+  let side = Math.random() < 0.5 ? 0 : 1;
+  while (out.length < n) {
+    if (pools[side].length) out.push(pools[side][used[side]++ % pools[side].length]);
+    side = 1 - side;
+  }
+  return shuffle(out);
+}
+
+function refillTimeQueue() {
+  state.selected.forEach(sel => {
+    shuffle(LESSONS[sel.letter].words.slice()).forEach(w => state.queue.push(toItem(sel, w)));
+  });
+}
+
+function startGame(opts) {
+  opts = opts || {};
+  if (!state.selected.length) return;
   window.__wiseStartTime = Date.now();
-  if (!state.selectedLetter) return;
-  const lesson = LESSONS[state.selectedLetter];
-  state.currentWords = shuffle([...lesson.words]);
-  state.wordIndex = 0;
+  state.session++;
+  if (state.timer) { clearInterval(state.timer); state.timer = null; }
   state.score = 0; state.total = 0;
   state.timeLeft = GAME_DURATION;
+  state.paused = false;
   state.wrongAnswers = [];
+  state.wrongItems = [];
+  state.perLetter = {};
+  state.selected.forEach(sel => { state.perLetter[sel.letter] = { score: 0, total: 0, wrong: [] }; });
   state.combo = 0;
   state.maxCombo = 0;
   state.recentAnswers = [];
   state.adaptiveSpeed = 1.0;
 
-  const tl = document.getElementById('target-letter');
-  tl.textContent = state.selectedLetter;
-  tl.className = 'target-letter' + (state.selectedLetter.length > 1 ? ' digraph' : '');
-  tl.style.background = state.selectedColor;
+  // おためし（採点しない）2問：さいしょの もじで YES を1問、NO を1問
+  state.warmQueue = []; state.warmIndex = 0;
+  const first = state.selected[0];
+  if (state.warmup && !opts.skipWarmup) {
+    const words = LESSONS[first.letter].words;
+    const yes = shuffle(words.filter(w => w.hasTarget))[0];
+    const no = shuffle(words.filter(w => !w.hasTarget))[0];
+    [yes, no].forEach(w => { if (w && state.warmQueue.length < WARMUP_COUNT) state.warmQueue.push(toItem(first, w)); });
+  }
+  const warmWords = state.warmQueue.map(it => it.word);
+
+  // 本番の問題
+  state.queue = []; state.qIndex = 0;
+  if (state.mode === 'practice') {
+    const n = state.selected.length;
+    const total = Math.max(state.count, n);          // どの もじも 1問は出す
+    state.selected.forEach((sel, i) => {
+      const share = Math.floor(total / n) + (i < total % n ? 1 : 0);
+      pickBalanced(LESSONS[sel.letter].words, share, i === 0 ? warmWords : [])
+        .forEach(w => state.queue.push(toItem(sel, w)));
+    });
+  } else {
+    refillTimeQueue();
+  }
 
   document.getElementById('score-num').textContent = '0';
   document.getElementById('q-num').textContent = '0';
-  updateTimerBar();
+  state.phase = state.warmQueue.length ? 'warmup' : 'main';
   showScreen('game-screen');
+  if (state.phase === 'main') beginMain(true);
+  else { updateHud(); nextWord(); }
+}
+
+// おためしが終わったら（または無い場合は最初から）本番へ
+function beginMain(silent) {
+  state.phase = 'main';
+  if (!silent) showComboOverlay('ここから ほんばん！');
+  updateHud();
   nextWord();
-  startTimer();
+  if (state.mode === 'time') startTimer();
 }
 
 function shuffle(arr) {
@@ -948,17 +1295,86 @@ function shuffle(arr) {
 }
 
 // ============================================================
+// HUD・ターゲット・判定基準の表示
+// ============================================================
+function updateHud() {
+  const num = document.getElementById('timer-num');
+  const phase = document.getElementById('phase-label');
+  if (state.phase === 'warmup') {
+    phase.textContent = '🔰 おためし（てんすうに はいらないよ）';
+    phase.className = 'phase-label warmup';
+    num.textContent = 'おためし ' + Math.max(1, state.warmIndex) + '/' + state.warmQueue.length;
+    num.className = 'timer-num small';
+    setBar(state.warmIndex / state.warmQueue.length);
+  } else if (state.mode === 'practice') {
+    phase.textContent = '🌱 れんしゅう（じかんは きにしないで OK）';
+    phase.className = 'phase-label';
+    num.textContent = Math.max(1, state.qIndex) + ' / ' + state.queue.length;
+    num.className = 'timer-num small';
+    setBar(state.total / state.queue.length);
+  } else {
+    phase.textContent = '⏱ タイムアタック 30びょう';
+    phase.className = 'phase-label';
+    updateTimerDisplay();
+  }
+}
+function setBar(ratio) {
+  document.getElementById('timer-bar').style.width = Math.max(0, Math.min(1, ratio)) * 100 + '%';
+}
+
+function showTarget(item) {
+  const tl = document.getElementById('target-letter');
+  const changed = tl.dataset.letter !== item.letter;
+  tl.textContent = item.letter;
+  tl.dataset.letter = item.letter;
+  tl.className = 'target-letter' + (item.letter.length > 1 ? ' digraph' : '');
+  tl.style.background = item.color;
+  if (changed) { tl.style.animation = 'none'; tl.offsetHeight; tl.style.animation = ''; }
+
+  // 判定基準：実際の判定（データ）と同じ基準を表示する
+  const rule = document.getElementById('rule-text');
+  rule.innerHTML = '';
+  const s = document.createElement('span');
+  s.className = 'snd';
+  s.textContent = snd(item.letter);
+  if (lessonRule(item.letter) === 'first') {
+    rule.append('さいしょの おとが ', s, ' かな？');
+  } else {
+    rule.append('ことばの どこかに ', s, ' の おとが あるかな？');
+  }
+  const note = document.getElementById('sound-note');
+  note.hidden = !SOUND_NOTES[item.letter];
+  note.textContent = SOUND_NOTES[item.letter] || '';
+  return changed;
+}
+
+// ============================================================
 // WORD
 // ============================================================
 function nextWord() {
-  if (state.wordIndex >= state.currentWords.length) {
-    state.currentWords = shuffle([...LESSONS[state.selectedLetter].words]);
-    state.wordIndex = 0;
+  let item;
+  if (state.phase === 'warmup') {
+    item = state.warmQueue[state.warmIndex++];
+  } else {
+    if (state.qIndex >= state.queue.length) {
+      if (state.mode === 'practice') { endGame(); return; }
+      refillTimeQueue();
+    }
+    item = state.queue[state.qIndex++];
   }
-  state.currentWord = state.currentWords[state.wordIndex++];
+  const prev = state.currentWord;
+  state.currentWord = item;
   state.answering = true;
+  state.paused = false;
+  document.getElementById('explain').hidden = true;
+  document.getElementById('word-card').classList.remove('explaining');
+  document.getElementById('next-btn').hidden = true;
+  document.getElementById('answer-row').hidden = false;
   setButtons(true);
-  displayWord(state.currentWord.word);
+  const changed = showTarget(item);
+  if (changed && prev && state.phase === 'main') showComboOverlay('つぎは ' + item.letter + ' ！');
+  if (state.phase === 'warmup' || state.mode === 'practice') updateHud();
+  displayWord(item.word);
   speakWord();
 }
 
@@ -996,11 +1412,18 @@ function speakWord() {
   const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(word)}&tl=en-us&client=tw-ob`;
   const audio = new Audio(url);
   audio.play().catch(() => {
-    const u = new SpeechSynthesisUtterance(word);
-    u.lang = 'en-US'; u.rate = 0.85;
-    speechSynthesis.speak(u);
+    try {
+      const u = new SpeechSynthesisUtterance(word);
+      u.lang = 'en-US'; u.rate = 0.85;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(u);
+    } catch (e) {}
   });
   currentAudio = audio;
+}
+function stopAudio() {
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  try { speechSynthesis.cancel(); } catch (e) {}
 }
 
 // ============================================================
@@ -1010,40 +1433,106 @@ function answer(userSaysYes) {
   if (!state.answering) return;
   state.answering = false;
   setButtons(false);
-  const correct = (userSaysYes === state.currentWord.hasTarget);
-  state.total++;
-  document.getElementById('q-num').textContent = state.total;
+  const cw = state.currentWord;
+  const correct = (userSaysYes === cw.hasTarget);
+  const scored = state.phase === 'main';   // おためしは採点も記録もしない
 
-  // Track for adaptive difficulty
-  state.recentAnswers.push(correct);
-  if (state.recentAnswers.length > 5) state.recentAnswers.shift();
-  updateAdaptiveSpeed();
+  if (scored) {
+    state.total++;
+    state.perLetter[cw.letter].total++;
+    document.getElementById('q-num').textContent = state.total;
+    // Track for adaptive difficulty
+    state.recentAnswers.push(correct);
+    if (state.recentAnswers.length > 5) state.recentAnswers.shift();
+    updateAdaptiveSpeed();
+  }
 
   if (correct) {
-    state.score++;
-    state.combo++;
-    if (state.combo > state.maxCombo) state.maxCombo = state.combo;
-    document.getElementById('score-num').textContent = state.score;
     showFeedback('✅');
     playCorrectSound();
-    // Combo milestones
-    const milestones = { 3: 'NICE! 🔥', 5: 'GREAT! ⚡', 7: 'AMAZING! 🌟', 10: 'UNSTOPPABLE! 💥' };
-    if (milestones[state.combo]) showComboOverlay(milestones[state.combo]);
+    if (scored) {
+      state.score++;
+      state.perLetter[cw.letter].score++;
+      state.combo++;
+      if (state.combo > state.maxCombo) state.maxCombo = state.combo;
+      document.getElementById('score-num').textContent = state.score;
+      // Combo milestones
+      const milestones = { 3: 'NICE! 🔥', 5: 'GREAT! ⚡', 7: 'AMAZING! 🌟', 10: 'UNSTOPPABLE! 💥' };
+      if (milestones[state.combo]) showComboOverlay(milestones[state.combo]);
+    }
   } else {
-    state.combo = 0;
     showFeedback('❌');
     playWrongSound();
-    state.wrongAnswers.push({
-      q: state.currentWord.word + ' → ' + state.selectedLetter + ' の音がある？',
-      correct: state.currentWord.hasTarget ? 'Yes' : 'No',
-      chosen: userSaysYes ? 'Yes' : 'No',
-      tag: 'digraph',
-      word: state.currentWord.word
-    });
-    // WiseXP: report wrong answer
-    if(window.WiseXP) window.WiseXP.reportWrong({question:state.currentWord.word+' (target: '+state.selectedLetter+')', correct:String(state.currentWord.hasTarget), playerAnswer:String(userSaysYes)});
+    if (scored) {
+      state.combo = 0;
+      state.perLetter[cw.letter].wrong.push(cw.word);
+      state.wrongItems.push(cw);
+      state.wrongAnswers.push({
+        q: cw.word + ' → ' + (lessonRule(cw.letter) === 'first'
+          ? 'さいしょの音が ' + cw.letter + ' ？'
+          : cw.letter + ' の音がある？'),
+        correct: cw.hasTarget ? 'Yes' : 'No',
+        chosen: userSaysYes ? 'Yes' : 'No',
+        tag: 'digraph',
+        word: cw.word
+      });
+      // WiseXP: report wrong answer
+      if(window.WiseXP) window.WiseXP.reportWrong({question:cw.word+' (target: '+cw.letter+')', correct:String(cw.hasTarget), playerAnswer:String(userSaysYes)});
+    }
   }
-  setTimeout(() => { hideFeedback(); nextWord(); }, 700);
+
+  showExplain(cw, correct);
+  if (state.phase === 'main' && state.mode === 'practice') setBar(state.total / state.queue.length);
+
+  const session = state.session;
+  setTimeout(() => { if (session === state.session) hideFeedback(); }, 600);
+
+  if (state.phase === 'main' && state.mode === 'time') {
+    // タイムアタック：解説を読むあいだは時計を止めて、自動でつぎへ
+    state.paused = true;
+    setTimeout(() => { if (session === state.session) advance(); }, correct ? 900 : 2400);
+  } else {
+    // おためし・れんしゅう：じぶんの ペースで「つぎへ」
+    document.getElementById('answer-row').hidden = true;
+    const next = document.getElementById('next-btn');
+    const lastWarm = state.phase === 'warmup' && state.warmIndex >= state.warmQueue.length;
+    const lastMain = state.phase === 'main' && state.qIndex >= state.queue.length;
+    next.textContent = lastWarm ? 'ほんばん スタート ▶' : lastMain ? 'けっかを みる ▶' : 'つぎへ ▶';
+    next.hidden = false;
+    if (next.scrollIntoView) next.scrollIntoView({ block: 'nearest' });
+  }
+}
+
+// 回答後：絵・単語・音をむすびつけて見せる（例：sun → さいしょが /s/）
+function showExplain(item, correct) {
+  const ex = explainWord(item);
+  const box = document.getElementById('explain');
+  box.className = 'explain' + (correct ? '' : ' ng');
+  document.getElementById('explain-judge').textContent = correct ? '⭕ せいかい！' : '❌ ざんねん…';
+  const w = document.getElementById('explain-word');
+  w.innerHTML = '';
+  if (ex.len > 0) {
+    const b = document.createElement('b');
+    b.textContent = item.word.slice(ex.from, ex.from + ex.len);
+    w.append(item.word.slice(0, ex.from), b, item.word.slice(ex.from + ex.len));
+  } else {
+    w.textContent = item.word;
+  }
+  document.getElementById('explain-text').textContent = '→ ' + ex.text;
+  document.getElementById('explain-ans').textContent = 'だから こたえは ' + (item.hasTarget ? 'YES' : 'NO');
+  box.hidden = false;
+  document.getElementById('word-card').classList.add('explaining');
+}
+
+function advance() {
+  if (state.answering) return;
+  hideFeedback();
+  if (state.phase === 'warmup') {
+    if (state.warmIndex >= state.warmQueue.length) beginMain(false);
+    else nextWord();
+  } else {
+    nextWord();   // れんしゅうモードで問題が終わっていれば nextWord が endGame を呼ぶ
+  }
 }
 
 function showComboOverlay(text) {
@@ -1082,18 +1571,20 @@ function hideFeedback() {
 }
 
 // ============================================================
-// TIMER
+// TIMER（タイムアタックのみ）
 // ============================================================
 function startTimer() {
   if (state.timer) clearInterval(state.timer);
   state.timeLeft = GAME_DURATION;
   updateTimerDisplay();
   state.timer = setInterval(() => {
+    if (state.paused) return;   // 解説の表示中は止める
     state.timeLeft -= 0.1 * state.adaptiveSpeed;
     if (state.timeLeft <= 0) {
       state.timeLeft = 0;
       updateTimerDisplay();
       clearInterval(state.timer);
+      state.timer = null;
       endGame();
     } else { updateTimerDisplay(); }
   }, 100);
@@ -1102,28 +1593,36 @@ function updateTimerDisplay() {
   const n = Math.ceil(state.timeLeft);
   const el = document.getElementById('timer-num');
   el.textContent = n;
-  el.classList.toggle('warning', n <= 5);
+  el.className = 'timer-num' + (n <= 5 ? ' warning' : '');
   updateTimerBar();
 }
 function updateTimerBar() {
-  document.getElementById('timer-bar').style.width = Math.max(0,(state.timeLeft/GAME_DURATION)*100)+'%';
+  setBar(state.timeLeft / GAME_DURATION);
 }
 
 // ============================================================
 // END GAME
 // ============================================================
 function endGame() {
-  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  state.session++;            // 残っている遅延処理（つぎの単語の読み上げ等）を無効にする
+  state.answering = false;
+  if (state.timer) { clearInterval(state.timer); state.timer = null; }
+  stopAudio();
+  hideFeedback();
+  document.querySelectorAll('.combo-overlay').forEach(el => el.remove());
   setButtons(false);
   const ratio = state.total > 0 ? state.score / state.total : 0;
-  let stars='⭐', title='おわり！', msg='もう一回やってみよう！';
-  if (ratio >= 0.9)      { stars='⭐⭐⭐'; title='🎉 すごい！！'; msg='パーフェクトに近い！！'; launchConfetti(); }
-  else if (ratio >= 0.7) { stars='⭐⭐';   title='😄 よくできました！'; msg='どんどん上手になってるよ！'; }
-  // Save progress to localStorage
-  saveProgress(state.selectedLetter, state.score, state.total, state.wrongAnswers);
+  let stars='⭐', title='おわり！', msg='もう いっかい やってみよう！';
+  if (ratio >= 0.9)      { stars='⭐⭐⭐'; title='🎉 すごい！！'; msg='ほとんど パーフェクト！！'; launchConfetti(); }
+  else if (ratio >= 0.7) { stars='⭐⭐';   title='😄 よくできました！'; msg='どんどん じょうずに なってるよ！'; }
+  // Save progress to localStorage（もじごとに記録）
+  Object.keys(state.perLetter).forEach(letter => {
+    const pl = state.perLetter[letter];
+    if (pl.total > 0) saveProgress(letter, pl.score, pl.total, pl.wrong);
+  });
 
   // WiseXP: report game result
-  if(window.WiseXP) window.WiseXP.reportGame({score:state.score, correct:state.score, total:state.total, maxCombo:0, grade:''});
+  if(window.WiseXP) window.WiseXP.reportGame({score:state.score, correct:state.score, total:state.total, maxCombo:state.maxCombo, grade:''});
 
   // → MoWISE portal へスコア送信 (WiseGame Bridge)
   try {
@@ -1131,14 +1630,14 @@ function endGame() {
     window.WiseGame && window.WiseGame.reportComplete({
       score: pct, maxScore: 100, accuracy: pct,
       timeSpent: Math.round((Date.now() - (window.__wiseStartTime || Date.now())) / 1000),
-      metadata: { letter: state.selectedLetter, correct: state.score,
+      metadata: { letter: state.selectedLetter, mode: state.mode, correct: state.score,
                   total: state.total, wrongAnswers: (state.wrongAnswers || []).slice(-20).map(w => typeof w === 'string' ? {q:w,correct:'',chosen:'',tag:'digraph'} : w) }
     });
   } catch(e) {}
 
   document.getElementById('result-title').textContent = title;
   document.getElementById('result-score').textContent = state.score;
-  document.getElementById('result-sub').textContent = `もんだい ${state.total} もん`;
+  document.getElementById('result-sub').textContent = `${state.total}もん ちゅう ${state.score}もん せいかい`;
   document.getElementById('result-stars').textContent = stars;
   document.getElementById('result-message').textContent = msg;
 
@@ -1157,45 +1656,46 @@ function endGame() {
     const el = document.createElement('div');
     el.id = 'near-miss-feedback';
     el.className = 'near-miss-msg near';
-    el.textContent = `あと${remaining}問でパーフェクト！もう一回？`;
+    el.textContent = `あと ${remaining}もんで パーフェクト！ もう いっかい？`;
     document.getElementById('result-message').after(el);
   }
 
-  // Show best score
-  const prog = getLetterProgress(state.selectedLetter);
+  // Show best score（もじごと）
   const bestBadge = document.getElementById('best-score-badge');
-  if (prog && prog.bestTotal > 0) {
-    bestBadge.textContent = `BEST: ${prog.bestScore}/${prog.bestTotal} (${prog.gamesPlayed}かいプレイ)`;
-  } else {
-    bestBadge.textContent = '';
-  }
+  bestBadge.textContent = Object.keys(state.perLetter).map(letter => {
+    const prog = getLetterProgress(letter);
+    return prog && prog.bestTotal > 0
+      ? `BEST ${letter}: ${prog.bestScore}/${prog.bestTotal} (${prog.gamesPlayed}かいプレイ)` : '';
+  }).filter(Boolean).join(' ／ ');
 
   // Show wrong answers review
   const wrongList = document.getElementById('wrong-list');
   wrongList.innerHTML = '';
-  if (state.wrongAnswers.length > 0) {
+  if (state.wrongItems.length > 0) {
+    // Deduplicate（もじ＋単語）
+    const seen = {};
+    const unique = state.wrongItems.filter(it => {
+      const k = it.letter + '|' + it.word;
+      if (seen[k]) return false;
+      seen[k] = true; return true;
+    });
     const titleEl = document.createElement('div');
     titleEl.className = 'wrong-list-title';
-    titleEl.textContent = `まちがえた ことば (${state.wrongAnswers.length})`;
+    titleEl.textContent = `まちがえた ことば (${unique.length})`;
     wrongList.appendChild(titleEl);
 
-    // Deduplicate
-    const unique = [...new Set(state.wrongAnswers)];
-    unique.forEach(word => {
+    unique.forEach(it => {
       const item = document.createElement('div');
       item.className = 'wrong-item';
       const emoji = document.createElement('span');
       emoji.className = 'wrong-item-emoji';
-      emoji.textContent = WORD_EMOJI[word] || '🔤';
+      emoji.textContent = WORD_EMOJI[it.word] || '🔤';
       const wordEl = document.createElement('span');
       wordEl.className = 'wrong-item-word';
-      wordEl.textContent = word;
+      wordEl.textContent = it.word;
       const info = document.createElement('span');
       info.className = 'wrong-item-info';
-      const wordData = LESSONS[state.selectedLetter].words.find(w => w.word === word);
-      info.textContent = wordData && wordData.hasTarget
-        ? `→ "${state.selectedLetter}" のおとが ある`
-        : `→ "${state.selectedLetter}" のおとが ない`;
+      info.textContent = '→ ' + explainWord(it).text + '（' + (it.hasTarget ? 'YES' : 'NO') + '）';
       item.appendChild(emoji);
       item.appendChild(wordEl);
       item.appendChild(info);
@@ -1232,20 +1732,34 @@ function launchConfetti() {
 // ============================================================
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  const el = document.getElementById(id);
+  el.classList.add('active');
+  el.scrollTop = 0;
 }
-function replay() { startGame(); }
+function replay() { startGame({ skipWarmup: true }); }   // 2回目からは おためし なし
 function goHome() {
-  if (state.timer) clearInterval(state.timer);
+  state.session++;            // 残っている遅延処理を無効にする
+  state.answering = false;
+  if (state.timer) { clearInterval(state.timer); state.timer = null; }
+  stopAudio();
+  hideFeedback();
   showScreen('start-screen');
   init();
 }
 
+applyUrlParams();
 init();
 
 // WiseXP SDK init
-if(window.WiseXP) window.WiseXP.init('phonics-sounds');
+// SDK はこのスクリプトより後に読み込まれるので、読み込み完了時（onload）に呼ぶ。
+function initWiseXP() {
+  if (window.WiseXP && !window.__wiseXpInited) {
+    window.__wiseXpInited = true;
+    try { window.WiseXP.init('phonics-sounds'); } catch (e) {}
+  }
+}
+initWiseXP();
 </script>
-<script src="https://cdn.jsdelivr.net/gh/winniek75/wise-xp-sdk@main/wise-xp.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/winniek75/wise-xp-sdk@main/wise-xp.js" onload="initWiseXP()"></script>
 </body>
 </html>
