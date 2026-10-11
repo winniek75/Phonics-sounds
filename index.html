@@ -505,6 +505,167 @@
     0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
     100% { transform: translateY(110vh) rotate(720deg); opacity: 0.3; }
   }
+
+  /* ========== MOBILE OPTIMIZATION ========== */
+  @media (max-width: 640px) {
+    html {
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      align-items: flex-start;
+    }
+
+    .screen {
+      padding: 12px 10px 24px;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Touch targets: all buttons min 44px */
+    button, a, [role="button"] {
+      min-height: 44px;
+    }
+
+    /* Prevent iOS zoom on inputs */
+    input, textarea, select {
+      font-size: 16px !important;
+    }
+
+    /* START SCREEN */
+    .game-title {
+      font-size: 36px;
+    }
+
+    .letter-selector-label {
+      font-size: 15px;
+    }
+
+    /* Letter buttons: larger touch targets for young children */
+    .letter-btn {
+      min-width: 46px;
+      height: 46px;
+      font-size: 20px;
+      padding: 0 6px;
+      box-shadow: 3px 3px 0 var(--outline);
+    }
+
+    .letter-btn.digraph {
+      font-size: 15px;
+      min-width: 52px;
+    }
+
+    .start-btn {
+      font-size: 24px;
+      padding: 14px 36px;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    /* GAME SCREEN */
+    #game-screen {
+      padding: 12px;
+      gap: 10px;
+    }
+
+    .score-box {
+      font-size: 20px;
+      padding: 5px 10px;
+      min-width: 58px;
+    }
+
+    .timer-num {
+      font-size: 28px;
+    }
+
+    .target-letter {
+      font-size: 48px;
+      min-width: 80px;
+      height: 80px;
+      padding: 0 12px;
+    }
+
+    .target-letter.digraph {
+      font-size: 32px;
+      min-width: 100px;
+    }
+
+    .word-card {
+      max-width: 100%;
+      padding: 14px;
+    }
+
+    .word-image-wrap {
+      width: 120px;
+      height: 120px;
+    }
+
+    .word-image-placeholder {
+      font-size: 56px;
+    }
+
+    .word-text {
+      font-size: 32px;
+      letter-spacing: 2px;
+    }
+
+    /* YES/NO buttons: large touch targets for children */
+    .ans-btn {
+      height: 72px;
+      font-size: 24px;
+      border-radius: 16px;
+      box-shadow: 4px 4px 0 var(--outline);
+    }
+
+    .answer-row {
+      gap: 10px;
+      max-width: 100%;
+    }
+
+    .speak-btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      min-height: 48px;
+    }
+
+    /* RESULT SCREEN */
+    .result-title {
+      font-size: 36px;
+    }
+
+    .result-card {
+      padding: 18px 20px;
+    }
+
+    .result-score {
+      font-size: 60px;
+    }
+
+    .replay-btn {
+      font-size: 24px;
+      padding: 14px 36px;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .back-btn {
+      font-size: 14px;
+      padding: 10px 20px;
+      min-height: 44px;
+    }
+
+    /* Wrong answers review */
+    .wrong-list {
+      max-width: 100%;
+    }
+
+    .combo-overlay {
+      font-size: 36px;
+    }
+  }
 </style>
 <script>
 /* ============================================================
